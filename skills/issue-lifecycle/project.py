@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Aymard Kouakou - see NOTICE
 """project.py: keep every issue driven by the repository's GitHub Project and attached to an epic.
 
 Standard library + gh only. Never prints tokens.

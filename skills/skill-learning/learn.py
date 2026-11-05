@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Aymard Kouakou - see NOTICE
 """skill-learning: record how skills are used and turn the history into improvement briefs.
 
 Standard library only. Local file only (~/.claude/skill-state/usage.jsonl). Never records secrets,

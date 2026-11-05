@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Aymard Kouakou - see NOTICE
 """Repository conventions: English-only skills, frontmatter, no secrets or addresses."""
 import re
 import unittest

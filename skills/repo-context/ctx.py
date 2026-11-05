@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Aymard Kouakou - see NOTICE
 """repo-context: resolve and remember the active GitHub repository (fully gh-compatible).
 
 Standard library only. Never prints or stores tokens, passwords or any secret.

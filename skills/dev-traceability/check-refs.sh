@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Aymard Kouakou - see NOTICE
 # List commits in a range that carry no issue reference (#n or owner/repo#n): check-refs.sh <base>..<head>
 # Exit code 1 if a reference is missing (usable in CI). Read-only.
 set -euo pipefail

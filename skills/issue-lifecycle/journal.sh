@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Aymard Kouakou - see NOTICE
 # Append a timestamped (UTC) entry to an issue journal: journal.sh <issue#> <type> <text-file> [owner/repo]
 # Types: Observation | Hypothesis | Test | Result | Decision | Action | Interaction | "Method error" | Retrospective
 # (legacy French names are accepted). The entry label is rendered in the repository's GitHub language

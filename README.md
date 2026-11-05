@@ -4,6 +4,7 @@
 
 [![release](https://img.shields.io/github/v/release/aymardkouakou/claude-skills)](https://github.com/aymardkouakou/claude-skills/releases)
 ![skills](https://img.shields.io/badge/skills-11-blue)
+[![license](https://img.shields.io/github/license/aymardkouakou/claude-skills)](LICENSE)
 ![python](https://img.shields.io/badge/python-%E2%89%A53.9%20stdlib%20only-informational)
 
 Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (100 % statement coverage of the Python helpers) and installed globally by symlink.
@@ -76,6 +77,10 @@ python3 -m unittest discover -s tests
 ```
 
 Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENTIONS.md`](CONVENTIONS.md). Release history: [`CHANGELOG.md`](CHANGELOG.md). Issues and ideas are welcome.
+
+## License
+
+[Apache-2.0](LICENSE) © 2026 [Aymard Kouakou](https://github.com/aymardkouakou). Reuse, modification and redistribution are free, **provided the [`NOTICE`](NOTICE) file and the copyright notice are kept** and significant changes are stated: the original author is always credited.
 
 ## Scope and limits
 
