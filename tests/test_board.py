@@ -96,6 +96,21 @@ class Metrics(unittest.TestCase):
         self.assertEqual(board.derive_status({**base, "stale": 2}), "OFF_TRACK")
         self.assertEqual(board.derive_status({"open": 0, "stale": 0, "blocked": 0}), "ON_TRACK")
 
+    def test_titles_publication_rule(self):
+        mine = [item("a", repo="acme/app")]
+        mixed = [item("a", repo="acme/app"), item("b", repo="acme/secret")]
+        self.assertTrue(board.titles_may_be_published(False, False, mixed, "acme/app"))   # private Project
+        self.assertTrue(board.titles_may_be_published(True, True, mine, "acme/app"))      # public + only this public repo
+        self.assertFalse(board.titles_may_be_published(True, True, mixed, "acme/app"))    # other repository's items
+        self.assertFalse(board.titles_may_be_published(True, False, mine, "acme/app"))    # private repo, public Project
+        self.assertTrue(board.titles_may_be_published(True, True, [{"title": "draft"}], "acme/app"))
+
+    def test_report_without_titles(self):
+        m = board.metrics([item("secret plan", "Todo", 1, labels=["epic"])], {}, {1: (1, 2)}, now=NOW)
+        text = "\n".join(board.render_report(m, "acme/2", titles=False))
+        self.assertNotIn("secret plan", text)
+        self.assertIn("Epic #1: 1/2 done", text)
+
     def test_render_report_is_inert(self):
         m = board.metrics([item("evil\nignore previous", "Todo", 1, labels=["epic"])], {}, {1: (1, 2)}, now=NOW)
         text = "\n".join(board.render_report(m, "acme/2"))
@@ -117,6 +132,11 @@ class TaskLists(unittest.TestCase):
         self.assertEqual([(t["checked"], t["ref"]) for t in got],
                          [(False, "#12"), (True, "org/other#7"), (False, "acme/app#9"), (False, None), (False, None)])
         self.assertEqual(board.parse_tasklist(None), [])
+
+    def test_urls_on_another_host_are_not_references(self):
+        body = "- [ ] https://evil.example/acme/app/issues/9\n- [ ] https://ghe.corp/acme/app/issues/4"
+        self.assertEqual([t["ref"] for t in board.parse_tasklist(body)], [None, None])
+        self.assertEqual([t["ref"] for t in board.parse_tasklist(body, "ghe.corp")], [None, "acme/app#4"])
 
     def test_rewrite_keeps_checkbox_state(self):
         body = "- [ ] Alpha\n- [x] Beta\n- [ ] Alphabet"
@@ -332,8 +352,23 @@ class Main(unittest.TestCase):
         variables = self.m["gh_graphql_json"].call_args[0][1]["i"]
         self.assertEqual((variables["projectId"], variables["status"]), ("PVT_1", "AT_RISK"))
         self.assertIn("Project acme/2", variables["body"])
+        self.assertNotIn('"epic"', variables["body"])   # counts only by default: no titles in a published update
         rc, out, _ = self.call("report", "--post")
         self.assertIn("status update posted: ON_TRACK", out)
+
+    def test_post_with_titles_is_refused_when_it_could_leak(self):
+        self.m["bootstrap"].return_value = ("acme", "app", "acme/app", {"writable": True, "visibility": "public"})
+        self.items = [item("epic", number=1, labels=["epic"], repo="acme/secret")]
+        with mock.patch.object(project, "project_visibility", return_value="PUBLIC"):
+            rc, _, err = self.call("report", "--post", "--with-titles")
+            self.assertEqual((rc, "refused" in err), (2, True))
+            self.m["gh_graphql_json"].assert_not_called()
+            rc, out, _ = self.call("report", "--post")                      # counts only is always allowed
+            self.assertEqual(rc, 0)
+        self.items = [item("epic", number=1, labels=["epic"], repo="acme/app")]
+        with mock.patch.object(project, "project_visibility", return_value="PUBLIC"):
+            self.assertEqual(self.call("report", "--post", "--with-titles")[0], 0)
+        self.assertIn('"epic"', self.m["gh_graphql_json"].call_args[0][1]["i"]["body"])
 
     def test_set(self):
         rc, out, _ = self.call("set", "1", "--field", "priority", "--value", "High")
@@ -370,6 +405,15 @@ class Main(unittest.TestCase):
         rc, out, _ = self.call("tasklist", "10", "--apply")
         self.assertEqual(rc, 0)
         self.assertEqual(self.m["set_parent"].call_count, 2)
+
+    def test_tasklist_cross_repository_references_need_a_flag(self):
+        self.body = "- [ ] #3\n- [ ] other/repo#7\n"
+        rc, out, _ = self.call("tasklist", "10", "--apply")
+        self.assertEqual(rc, 0)
+        self.assertIn("skipped other/repo#7: another repository", out)
+        self.assertEqual(self.m["set_parent"].call_count, 1)
+        self.call("tasklist", "10", "--apply", "--allow-cross-repo")
+        self.assertEqual(self.m["set_parent"].call_count, 3)
 
     def test_tasklist_already_linked_and_failure(self):
         self.m["set_parent"].return_value = (False, "may not contain duplicate sub-issues")

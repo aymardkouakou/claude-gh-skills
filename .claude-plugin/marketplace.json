@@ -10,7 +10,7 @@
       "name": "traceable-dev",
       "source": "./",
       "description": "Seven skills for GitHub-driven development: Project and epic tracking, change traceability (ISO 27001/9001/12207, ITIL, SOC 2), security audit, secrets hygiene, incident response.",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "license": "Apache-2.0"
     }
   ]

@@ -81,10 +81,10 @@ Update with `git pull && ./install.sh` (symlink install, removed skills are prun
 ```bash
 ~/.claude/skills/issue-lifecycle/board.py setup  --apply   # fields: Priority, Kind, Estimate, Target date, Iteration
 ~/.claude/skills/issue-lifecycle/board.py views  --apply   # the 15 standard views below (idempotent)
-~/.claude/skills/issue-lifecycle/board.py report [--post]  # metrics; --post publishes a Project status update
+~/.claude/skills/issue-lifecycle/board.py report [--post]  # metrics; --post publishes counts only (no titles)
 ~/.claude/skills/issue-lifecycle/board.py set 12 --field Priority --value High
 ~/.claude/skills/issue-lifecycle/board.py draft "Plan next iteration" ; board.py drafts ; board.py convert <item-id>
-~/.claude/skills/issue-lifecycle/board.py tasklist 12 --apply [--create]   # `- [ ] #n` checklists -> sub-issues
+~/.claude/skills/issue-lifecycle/board.py tasklist 12 --apply [--create]   # `- [ ] #n` checklists -> sub-issues (same repository; --allow-cross-repo for others)
 ```
 
 | View | Layout | Filter | Answers |

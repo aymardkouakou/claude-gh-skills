@@ -2,6 +2,12 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.6.1] - 2026-11-05
+
+### Security
+- `board.py tasklist`: references to another repository are skipped unless `--allow-cross-repo` is given (a task list is untrusted text and could otherwise make the tool write to a repository the user did not name); issue URLs are only understood on the repository's own host.
+- `board.py report --post`: the published status update carries counts only; titles need `--with-titles` and are refused when a public Project could show items of other or non-public repositories.
+
 ## [0.6.0] - 2026-11-05
 
 ### Added

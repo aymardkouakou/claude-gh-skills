@@ -9,13 +9,17 @@ Usage:
   board.py fields   [--repo R]                              list the Project fields and their options (read-only)
   board.py setup    [--repo R] [--apply]                    create the missing standard fields (dry-run unless --apply)
   board.py views    [--repo R] [--apply]                    create the missing standard views (dry-run unless --apply)
-  board.py report   [--repo R] [--post] [--status S]        follow-up metrics; --post publishes a Project status update
+  board.py report   [--repo R] [--post] [--status S] [--with-titles]
+                                                            follow-up metrics; --post publishes a Project status update
+                                                            (counts only; titles only if --with-titles and nothing can leak)
   board.py set      REF --field NAME --value V [--pr]       set a field value on an issue or pull request item
   board.py draft    TITLE [--body TEXT]                     add a draft item to the Project
   board.py drafts   [--repo R]                              list draft items
   board.py convert  ITEM_ID [--repo R]                      turn a draft item into an issue of the repository
-  board.py tasklist EPIC [--apply] [--create]               turn `- [ ] #n` task lists of an epic into sub-issues
-                                                            (--create also makes issues from plain `- [ ] text` lines)
+  board.py tasklist EPIC [--apply] [--create] [--allow-cross-repo]
+                                                            turn `- [ ] #n` task lists of an epic into sub-issues
+                                                            (--create also makes issues from plain `- [ ] text` lines;
+                                                            references to other repositories need --allow-cross-repo)
 
 The API cannot set a view's grouping or sorting, nor enable the built-in workflows: `views` prints those manual steps.
 Exit codes as project.py: 0 ok, 1 differences found (dry run), 2 error, 3 project undetermined, 4 missing scope.
@@ -23,6 +27,7 @@ Exit codes as project.py: 0 ok, 1 differences found (dry run), 2 error, 3 projec
 import argparse
 import importlib.util
 import json
+import os
 import re
 import sys
 from datetime import date, datetime, timedelta, timezone
@@ -145,25 +150,35 @@ def derive_status(m):
     return "AT_RISK" if (m["blocked"] or m["stale"]) else "ON_TRACK"
 
 
-def render_report(m, title):
+def render_report(m, title, titles=True):
     lines = [f"Project {title}: {m['total']} item(s), {m['open']} open, {m['prs']} open PR(s), {m['drafts']} draft(s)"]
     lines += [f"  {k}: {v}" for k, v in sorted(m["by_status"].items())]
     lines.append(f"Attention: {m['no_assignee']} unassigned, {m['no_priority']} without priority, {m['blocked']} blocked, "
                  f"{m['stale']} stale (>= {STALE_DAYS} days)")
     for e in m["epics"]:
-        lines.append(f"Epic #{e['number']} {project.safe_title(e['title'])}: {e['done']}/{e['total']} done")
+        name = f" {project.safe_title(e['title'])}" if titles else ""
+        lines.append(f"Epic #{e['number']}{name}: {e['done']}/{e['total']} done")
     return lines
 
 
-def parse_tasklist(body):
-    """Task-list lines of an issue body -> [{checked, text, ref}] where ref is 'owner/repo#n', '#n' or None."""
+def titles_may_be_published(project_public, repo_public, items, full):
+    """Titles may go into a published status update only if no reader outside the audience of the data could see them:
+    a private Project, or a public Project showing only the items of this (public) repository."""
+    if not project_public:
+        return True
+    return bool(repo_public) and all((i.get("content") or {}).get("repository", full) == full for i in items)
+
+
+def parse_tasklist(body, host="github.com"):
+    """Task-list lines of an issue body -> [{checked, text, ref}] where ref is 'owner/repo#n', '#n' or None.
+    Issue URLs are only understood on the repository's own host."""
     out = []
     for line in (body or "").splitlines():
         m = re.match(r"^\s*[-*]\s+\[([ xX])\]\s+(.*\S)\s*$", line)
         if not m:
             continue
         text = m.group(2)
-        r = re.search(r"https://[^/\s]+/([\w.-]+)/([\w.-]+)/issues/(\d+)", text)
+        r = re.search(rf"https://{re.escape(host)}/([\w.-]+)/([\w.-]+)/issues/(\d+)", text)
         ref = f"{r.group(1)}/{r.group(2)}#{r.group(3)}" if r else None
         if not ref:
             r = re.search(r"(?:^|\s)((?:[\w.-]+/[\w.-]+)?#\d+)\b", text)
@@ -295,6 +310,7 @@ def main(argv=None):
         if name == "report":
             s.add_argument("--post", action="store_true")
             s.add_argument("--status", choices=["INACTIVE", "ON_TRACK", "AT_RISK", "OFF_TRACK", "COMPLETE"])
+            s.add_argument("--with-titles", action="store_true", help="include epic titles in the published update")
         if name == "set":
             s.add_argument("ref")
             s.add_argument("--field", required=True)
@@ -308,6 +324,7 @@ def main(argv=None):
         if name == "tasklist":
             s.add_argument("epic")
             s.add_argument("--create", action="store_true")
+            s.add_argument("--allow-cross-repo", action="store_true", help="also follow references to other repositories")
     a = ap.parse_args(argv)
     readonly = a.cmd in ("fields", "report", "drafts") and not getattr(a, "post", False)
     try:
@@ -366,10 +383,14 @@ def main(argv=None):
         if a.cmd == "report":
             items = list_items(po, pn)
             m = metrics(items, fetch_updated(full), epic_progress(items, owner, name))
-            lines = render_report(m, f"{po}/{pn}")
-            print("\n".join(lines))
+            print("\n".join(render_report(m, f"{po}/{pn}")))
             if a.post:
                 status = a.status or derive_status(m)
+                if a.with_titles and not titles_may_be_published(project.project_visibility(po, pn) == "PUBLIC",
+                                                                kind.get("visibility") == "public", items, full):
+                    raise RuntimeError("refused: titles would be published on a public Project that shows items from "
+                                       "other or non-public repositories. Post the counts only (drop --with-titles).")
+                lines = render_report(m, f"{po}/{pn}", titles=a.with_titles)
                 q = ("mutation($i:CreateProjectV2StatusUpdateInput!){createProjectV2StatusUpdate(input:$i){statusUpdate{id}}}")
                 project.gh_graphql_json(q, {"i": {"projectId": info["id"], "status": status, "body": "\n".join(lines)}})
                 print(f"status update posted: {status}")
@@ -413,7 +434,7 @@ def main(argv=None):
                                         "--json", "body", "--jq", ".body"])
             if rc != 0:
                 raise RuntimeError("cannot read the epic: " + err[:200])
-            todo = parse_tasklist(out)
+            todo = parse_tasklist(out, os.environ.get("GH_HOST", "github.com"))
             if not todo:
                 print("No task list in the epic body.")
                 return 0
@@ -422,6 +443,9 @@ def main(argv=None):
                 tag = project.safe_title(t["text"])
                 if t["ref"]:
                     child = project.parse_ref(t["ref"], epic.owner, epic.name)
+                    if (child.owner, child.name) != (epic.owner, epic.name) and not a.allow_cross_repo:
+                        print(f"skipped {child}: another repository (list text is untrusted; use --allow-cross-repo after checking it)")
+                        continue
                     if not a.apply:
                         print(f"would link {child} as sub-issue of {epic}  {tag}")
                         continue
