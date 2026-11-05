@@ -11,7 +11,7 @@ Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [C
 
 ## Why use them
 
-- **No orphan issues.** `issue-lifecycle` attaches each issue to the repository's GitHub Project and to an epic (native sub-issues), finds the Project automatically and always says which one it used. `project.py backfill` repairs existing issues.
+- **No orphan issues.** `issue-lifecycle` attaches each issue to the repository's GitHub Project and to an epic (native sub-issues). The Project and the GitHub language are **your choice**: the skill suggests a candidate, asks you to confirm, and always says which one it uses. A Project is created as visible as its repository. `project.py backfill` repairs existing issues.
 - **Auditable changes.** `dev-traceability` enforces requirement → issue → commit → PR → review → tests → deployment → verification, with a change register and traceability matrix mapped to ISO/IEC 27001, ISO 9001, ISO/IEC/IEEE 12207, ITIL 4 and SOC 2 (evidence, not certification).
 - **Never the wrong repository.** `repo-context` resolves the repo through `gh`, classifies it (personal or organization, public / private / internal, fork, archived, writable) and the other skills adapt to that profile.
 - **Safe by default.** No secret in output, writes refused on unverified or read-only repositories, destructive operations always confirmed.
@@ -66,7 +66,9 @@ Update with `git pull && ./install.sh`; remove with `./install.sh uninstall`.
 ```
 
 ```bash
-~/.claude/skills/issue-lifecycle/project.py resolve     # which Project drives this repository
+~/.claude/skills/issue-lifecycle/project.py resolve     # which Project drives this repository (asks you to confirm a candidate)
+~/.claude/skills/issue-lifecycle/project.py use OWNER/N  # record your choice
+~/.claude/skills/issue-lifecycle/project.py create       # new Project, linked, same visibility as the repo
 ~/.claude/skills/issue-lifecycle/project.py orphans     # open issues outside the Project or without an epic
 ~/.claude/skills/issue-lifecycle/project.py backfill --epic 12 --apply
 ```
@@ -83,7 +85,7 @@ Update with `git pull && ./install.sh`; remove with `./install.sh uninstall`.
 python3 -m unittest discover -s tests
 ```
 
-Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENTIONS.md`](CONVENTIONS.md). Release history: [`CHANGELOG.md`](CHANGELOG.md). Issues and ideas are welcome.
+Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENTIONS.md`](CONVENTIONS.md). Release history: [`CHANGELOG.md`](CHANGELOG.md). See also [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).
 
 ## License
 

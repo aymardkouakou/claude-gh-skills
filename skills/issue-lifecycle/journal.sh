@@ -22,7 +22,8 @@ ctx="$here/../repo-context/ctx.py"
 if [ -z "$repo" ]; then
   repo=$(python3 -I "$ctx" repo) || { echo "No active repository: pass owner/repo." >&2; exit 4; }
 fi
-lang=$(python3 -I "$ctx" lang 2>/dev/null || echo en)
+lang=$(python3 -I "$ctx" lang 2>/dev/null) || {
+  echo "REFUSED: no GitHub language chosen for this repository. Ask the user to confirm it, then run: ctx.py lang set CODE" >&2; exit 3; }
 label=$(python3 -I - "$here/labels.json" "$lang" "$type" <<'PY'
 import json, sys
 path, lang, typ = sys.argv[1:4]

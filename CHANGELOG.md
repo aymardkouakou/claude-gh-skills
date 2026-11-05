@@ -2,6 +2,20 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.4.0] - 2026-11-05
+
+### Added
+- `project.py create` (Project linked to the repository, as visible as it), `visibility` (realign) and `use OWNER/NUMBER` (record the user's choice).
+- Continuous integration (`.github/workflows/test.yml`: Python 3.9 and 3.12 on Linux and macOS), `SECURITY.md`, `CONTRIBUTING.md`.
+- Tests for the shell helpers `journal.sh` and `check-refs.sh`; 114 tests, 100% coverage of the Python helpers.
+
+### Changed
+- **The Project is the user's choice**: `project.py` only suggests a candidate (linked to the repository, or named like it) and exits 3 until the user confirms it with `use`; it no longer records a detected Project silently.
+- **The GitHub language is never defaulted**: `journal.sh` refuses (exit 3) while it is unset, and the skills require asking the user to confirm it.
+
+### Fixed
+- A repository without a linked Project could be attached to the owner's only other Project (for example another repository's board). Unrelated owner Projects are never picked.
+
 ## [0.3.0] - 2026-11-05
 
 ### Added

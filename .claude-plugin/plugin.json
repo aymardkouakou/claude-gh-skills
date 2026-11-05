@@ -1,6 +1,6 @@
 {
   "name": "traceable-dev",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Traceable, GitHub-driven development: issues in Projects and epics, change traceability (ISO 27001/9001/12207, ITIL, SOC 2), security and payment checks.",
   "author": { "name": "Aymard Kouakou", "url": "https://github.com/aymardkouakou" },
   "homepage": "https://github.com/aymardkouakou/claude-skills",

@@ -10,9 +10,13 @@ Usage:
   project.py attach   ISSUE... [--repo R] [--epic N]           add issues to the Project; with --epic, make them sub-issues of #N
   project.py orphans  [--repo R]                               open issues outside the Project or without an epic (read-only)
   project.py backfill [--repo R] [--epic N] [--apply]          fix orphans; dry-run unless --apply
+  project.py use      OWNER/NUMBER [--repo R]                  record the Project the user chose for the repository
+  project.py create   [--repo R] [--title T]                   create the repository's Project (linked, same visibility as the repo)
+  project.py visibility [--repo R] [--apply]                   align the Project visibility with the repository's
 
-Rules: one Project per repository. Resolution order: env CLAUDE_SKILL_PROJECT, repo-context note `project`
-("OWNER/NUMBER"), Projects linked to the repository, the owner's only open Project. Ambiguous or none: exit 3.
+Rules: one Project per repository, chosen by the USER, never silently by the tool. Known only through env
+CLAUDE_SKILL_PROJECT or the repo-context note `project` ("OWNER/NUMBER", set by `use` or `create`). Otherwise the tool
+suggests a candidate (linked to the repository, or named like it) and exits 3: ask the user to confirm or name another.
 Epics are issues with the `epic` label (or that already have sub-issues); members are native sub-issues.
 Exit codes: 0 ok, 2 error, 3 project/epic undetermined (ask the user), 4 token lacks the `project` scope.
 """
@@ -68,22 +72,32 @@ def has_project_scope(status_text):
     return "project" in scopes
 
 
-def pick_project(note, linked, owner_open):
-    """Return (owner, number, source) or raise Undetermined. Inputs: note 'OWNER/N' or None; project dicts."""
+def pick_project(note, linked, owner_open, repo_name=""):
+    """Return (owner, number, source) or raise Undetermined.
+
+    Order: note 'OWNER/N'; the only open Project linked to the repository; the only open owner Project whose title is
+    the repository name. Other owner Projects are never guessed: they may serve another repository."""
     if note:
         m = re.fullmatch(r"([\w.-]+)/(\d+)", note.strip())
         if m:
             return m.group(1), int(m.group(2)), "note"
-    for source, pool in (("linked", linked), ("owner", owner_open)):
-        pool = [p for p in pool if not p.get("closed")]
-        if len(pool) == 1:
-            return pool[0]["owner"], pool[0]["number"], source
-        if len(pool) > 1:
-            names = ", ".join(f'{p["owner"]}/{p["number"]} "{p.get("title", "")}"' for p in pool)
-            raise Undetermined(f"Several open Projects match ({names}). Ask the user which one drives this repository, "
-                               "then run: ctx.py note project OWNER/NUMBER")
-    raise Undetermined("No GitHub Project found for this repository. Ask the user to create or name one, "
-                       "then run: ctx.py note project OWNER/NUMBER")
+    linked = [p for p in linked if not p.get("closed")]
+    if len(linked) == 1:
+        return linked[0]["owner"], linked[0]["number"], "linked"
+    if len(linked) > 1:
+        raise Undetermined(f"Several open Projects are linked to this repository ({describe(linked)}). Ask the user which one "
+                           "drives it, then run: project.py use OWNER/NUMBER")
+    others = [p for p in owner_open if not p.get("closed")]
+    same = [p for p in others if p.get("title", "").lower() == repo_name.lower()]
+    if len(same) == 1:
+        return same[0]["owner"], same[0]["number"], "title"
+    hint = f" Existing owner Projects not linked to it: {describe(others)}." if others else ""
+    raise Undetermined("No GitHub Project is linked to this repository." + hint +
+                       " Ask the user to pick one (project.py use OWNER/NUMBER) or to create one (project.py create).")
+
+
+def describe(projects):
+    return ", ".join(f'{p["owner"]}/{p["number"]} "{safe_title(p.get("title", ""))[1:-1]}"' for p in projects)
 
 
 def is_epic(issue):
@@ -141,14 +155,15 @@ def resolve_project(owner, name, full):
     nodes = gh_graphql(PROJECTS_QUERY, o=owner, n=name)["repository"]["projectsV2"]["nodes"]
     linked = [{**p, "owner": (p["owner"] or {}).get("login", owner)} for p in nodes]
     owner_open = []
-    if not [p for p in linked if not p["closed"]]:
+    if not [p for p in linked if not p["closed"]]:  # no linked Project: look for a same-named or candidate owner Project
         rc, out, _ = run(["gh", "project", "list", "--owner", owner, "--format", "json", "--limit", "50"])
         if rc == 0:
             owner_open = [{"owner": owner, "number": p["number"], "title": p.get("title", ""), "closed": p.get("closed", False)}
                           for p in json.loads(out).get("projects", [])]
-    o, n, src = pick_project(None, linked, owner_open)
-    ctx("note", "project", f"{o}/{n}")  # remember the automatic choice; it is always announced below
-    return o, n, src
+    o, n, src = pick_project(None, linked, owner_open, name)
+    # A detected Project is only a suggestion: the user must confirm it (project.py use) or name another one.
+    raise Undetermined(f"Confirmation required: {o}/{n} ({src}) looks like this repository's Project, but the choice is the "
+                       f"user's. Ask the user to confirm it or give another one, then run: project.py use {o}/{n}")
 
 
 def fetch_open_issues(owner, name):
@@ -184,6 +199,41 @@ def set_parent(owner, name, epic, number):
         return False, str(e)
 
 
+def wanted_visibility(kind):
+    """A Project is exactly as visible as its repository: public repository -> PUBLIC, private or internal -> PRIVATE."""
+    return "PUBLIC" if kind.get("visibility") == "public" else "PRIVATE"
+
+
+def project_visibility(po, pn):
+    """Current visibility of the Project ('PUBLIC' or 'PRIVATE'), or None when it cannot be read."""
+    rc, out, _ = run(["gh", "project", "view", str(pn), "--owner", po, "--format", "json"])
+    try:
+        return "PUBLIC" if rc == 0 and json.loads(out).get("public") else ("PRIVATE" if rc == 0 else None)
+    except ValueError:
+        return None
+
+
+def set_visibility(po, pn, wanted):
+    rc, _, err = run(["gh", "project", "edit", str(pn), "--owner", po, "--visibility", wanted])
+    return rc == 0, err[:200]
+
+
+def create_project(owner, name, kind, title=None):
+    """Create the repository's Project, link it, align its visibility, remember it. Returns (number, messages)."""
+    rc, out, err = run(["gh", "project", "create", "--owner", owner, "--title", title or name, "--format", "json"])
+    if rc != 0:
+        raise RuntimeError("gh project create failed: " + err[:200])
+    number = json.loads(out)["number"]
+    msgs = [f"created Project {owner}/{number}"]
+    rc, _, err = run(["gh", "project", "link", str(number), "--owner", owner, "--repo", f"{owner}/{name}"])
+    msgs.append("linked to the repository" if rc == 0 else "LINK FAILED: " + err[:200])
+    wanted = wanted_visibility(kind)
+    ok, err = set_visibility(owner, number, wanted)
+    msgs.append(f"visibility {wanted}" if ok else "VISIBILITY FAILED: " + err)
+    ctx("note", "project", f"{owner}/{number}")
+    return number, msgs
+
+
 def announce(po, pn, src):
     print(f"Project: {po}/{pn} (source: {src})", file=sys.stderr)
 
@@ -191,14 +241,18 @@ def announce(po, pn, src):
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="project.py", description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("resolve", "attach", "orphans", "backfill"):
+    for name in ("resolve", "attach", "orphans", "backfill", "create", "visibility", "use"):
         s = sub.add_parser(name)
         s.add_argument("--repo")
+        if name == "use":
+            s.add_argument("project", help="OWNER/NUMBER")
         if name == "attach":
             s.add_argument("issues", nargs="+", type=int)
         if name in ("attach", "backfill"):
             s.add_argument("--epic", type=int)
-        if name == "backfill":
+        if name == "create":
+            s.add_argument("--title")
+        if name in ("backfill", "visibility"):
             s.add_argument("--apply", action="store_true")
     a = ap.parse_args(argv)
     try:
@@ -218,8 +272,41 @@ def main(argv=None):
         if a.cmd != "resolve" and not kind.get("writable", True):
             print("Repository not writable (archived, read-only permission or issues disabled): stop and tell the user.", file=sys.stderr)
             return 2
+        if a.cmd == "use":
+            m = re.fullmatch(r"([\w.-]+)/(\d+)", a.project)
+            if not m:
+                raise RuntimeError("expected OWNER/NUMBER, for example acme/3")
+            po, pn = m.group(1), int(m.group(2))
+            if project_visibility(po, pn) is None:
+                raise RuntimeError(f"Project {a.project} not found or not readable with this token")
+            ctx("note", "project", a.project)
+            announce(po, pn, "chosen by the user")
+            current, wanted = project_visibility(po, pn), wanted_visibility(kind)
+            if current != wanted:
+                print(f"WARNING: Project is {current} but the repository is {kind.get('visibility')}: they must match "
+                      "(run project.py visibility --apply).", file=sys.stderr)
+            print(f"Project {a.project} recorded for {full}.")
+            return 0
+        if a.cmd == "create":
+            number, msgs = create_project(owner, name, kind, a.title)
+            print("\n".join(msgs))
+            return 2 if any("FAILED" in m for m in msgs) else 0
         po, pn, src = resolve_project(owner, name, full)
         announce(po, pn, src)
+        current, wanted = project_visibility(po, pn), wanted_visibility(kind)
+        if current and current != wanted:
+            print(f"WARNING: Project is {current} but the repository is {kind.get('visibility')}: they must match "
+                  "(run project.py visibility --apply).", file=sys.stderr)
+        if a.cmd == "visibility":
+            if current == wanted:
+                print(f"Project visibility {current} matches the repository.")
+                return 0
+            if not a.apply:
+                print(f"Project is {current}, wanted {wanted}. Dry run: re-run with --apply.")
+                return 1
+            ok, err = set_visibility(po, pn, wanted)
+            print(f"visibility -> {wanted}: {'ok' if ok else 'FAILED ' + err}")
+            return 0 if ok else 2
         if a.cmd == "resolve":
             print(json.dumps({"repo": full, "project_owner": po, "project_number": pn, "source": src}))
             return 0

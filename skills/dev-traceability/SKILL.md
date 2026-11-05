@@ -12,7 +12,7 @@ The project's own branch and PR flow (CLAUDE.md, CONTRIBUTING, repo-context `not
 ## Context
 `REPO=$(${CLAUDE_SKILL_DIR}/../repo-context/ctx.py repo)`; use `--repo "$REPO"` for every `gh` call. Ask the user before any write if the repository is not confirmed by `gh`. Adapt controls to the repository profile (`ctx.py resolve` → `kind`: personal or organization, public/private/internal, fork, archived): for example a solo personal account cannot satisfy "reviewer different from author" and needs a documented exception, and a public repository gets stricter masking. Save verified workflow facts with `ctx.py note` (for example "promotion flow: develop → sandbox → main").
 
-Language: PR descriptions, change records and reports published in the repository follow `ctx.py lang` (ask once if unset); commit messages follow `ctx.py lang --commit` (default English). The skill files stay in English.
+Language: PR descriptions, change records and reports published in the repository follow `ctx.py lang` (if unset, stop and ask the user to confirm the language before writing anything; never default); commit messages follow `ctx.py lang --commit` (default English). The skill files stay in English.
 
 ## The traceability chain (a missing link is a finding)
 

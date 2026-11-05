@@ -39,15 +39,26 @@ class PickProject(unittest.TestCase):
         p = {"owner": "acme", "number": 2, "closed": False}
         self.assertEqual(project.pick_project(None, [p], []), ("acme", 2, "linked"))
 
-    def test_closed_ignored_falls_back_to_owner(self):
+    def test_closed_ignored_then_same_title(self):
         closed = {"owner": "acme", "number": 1, "closed": True}
-        opened = {"owner": "acme", "number": 4, "closed": False}
-        self.assertEqual(project.pick_project(None, [closed], [opened]), ("acme", 4, "owner"))
+        opened = {"owner": "acme", "number": 4, "closed": False, "title": "App"}
+        self.assertEqual(project.pick_project(None, [closed], [opened], "app"), ("acme", 4, "title"))
+
+    def test_unrelated_owner_project_is_never_guessed(self):
+        other = {"owner": "acme", "number": 4, "closed": False, "title": "Other repo board"}
+        with self.assertRaises(project.Undetermined) as e:
+            project.pick_project(None, [], [other], "app")
+        self.assertIn("acme/4", str(e.exception))
+        self.assertIn("not linked", str(e.exception))
+        two = [{"owner": "acme", "number": n, "closed": False, "title": "App"} for n in (1, 2)]
+        with self.assertRaises(project.Undetermined):
+            project.pick_project(None, [], two, "app")
 
     def test_ambiguous_or_missing_asks_user(self):
         two = [{"owner": "a", "number": 1}, {"owner": "a", "number": 2}]
-        with self.assertRaises(project.Undetermined):
+        with self.assertRaises(project.Undetermined) as e:
             project.pick_project(None, two, [])
+        self.assertIn("Several", str(e.exception))
         with self.assertRaises(project.Undetermined):
             project.pick_project(None, [], [])
 
@@ -157,24 +168,24 @@ class ResolveProject(unittest.TestCase):
         with mock.patch.object(project, "ctx", return_value=(0, shown, "")):
             self.assertEqual(project.resolve_project("acme", "app", "acme/app"), ("acme", 3, "note"))
 
-    def test_linked_is_remembered(self):
+    def test_detected_project_is_only_a_suggestion(self):
         node = {"number": 5, "title": "Board", "closed": False, "owner": {"login": "acme"}}
-        calls = []
-
-        def fake_ctx(*a):
-            calls.append(a)
-            return (2, "", "") if a[0] == "show" else (0, "", "")
-        with mock.patch.object(project, "ctx", side_effect=fake_ctx), \
+        with mock.patch.object(project, "ctx", return_value=(2, "", "")) as c, \
                 mock.patch.object(project, "gh_graphql", return_value=self.gql([node])):
-            self.assertEqual(project.resolve_project("acme", "app", "acme/app"), ("acme", 5, "linked"))
-        self.assertIn(("note", "project", "acme/5"), calls)
+            with self.assertRaises(project.Undetermined) as e:
+                project.resolve_project("acme", "app", "acme/app")
+        self.assertIn("Confirmation required: acme/5 (linked)", str(e.exception))
+        self.assertIn("project.py use acme/5", str(e.exception))
+        self.assertNotIn(("note", "project", "acme/5"), [x.args for x in c.call_args_list])  # nothing recorded silently
 
-    def test_owner_fallback(self):
-        listing = json.dumps({"projects": [{"number": 7, "title": "T"}]})
+    def test_same_title_owner_project_is_also_only_a_suggestion(self):
+        listing = json.dumps({"projects": [{"number": 7, "title": "App"}, {"number": 8, "title": "Elsewhere"}]})
         with mock.patch.object(project, "ctx", return_value=(2, "", "")), \
                 mock.patch.object(project, "gh_graphql", return_value=self.gql([{"number": 1, "closed": True, "owner": None}])), \
                 mock.patch.object(project, "run", return_value=(0, listing, "")):
-            self.assertEqual(project.resolve_project("acme", "app", "acme/app"), ("acme", 7, "owner"))
+            with self.assertRaises(project.Undetermined) as e:
+                project.resolve_project("acme", "app", "acme/app")
+        self.assertIn("Confirmation required: acme/7 (title)", str(e.exception))
 
     def test_owner_listing_failure_means_undetermined(self):
         with mock.patch.object(project, "ctx", return_value=(2, "", "")), \
@@ -223,6 +234,53 @@ class Mutations(unittest.TestCase):
             self.assertEqual(project.set_parent("acme", "app", 10, 4), (False, "bad"))
 
 
+class Visibility(unittest.TestCase):
+    def test_wanted_follows_repository(self):
+        self.assertEqual(project.wanted_visibility({"visibility": "public"}), "PUBLIC")
+        for v in ("private", "internal", None):
+            self.assertEqual(project.wanted_visibility({"visibility": v}), "PRIVATE")
+
+    def test_project_visibility_reading(self):
+        with mock.patch.object(project, "run", return_value=(0, json.dumps({"public": True}), "")):
+            self.assertEqual(project.project_visibility("acme", 1), "PUBLIC")
+        with mock.patch.object(project, "run", return_value=(0, json.dumps({"public": False}), "")):
+            self.assertEqual(project.project_visibility("acme", 1), "PRIVATE")
+        with mock.patch.object(project, "run", return_value=(1, "", "no")):
+            self.assertIsNone(project.project_visibility("acme", 1))
+        with mock.patch.object(project, "run", return_value=(0, "not json", "")):
+            self.assertIsNone(project.project_visibility("acme", 1))
+
+    def test_set_visibility(self):
+        with mock.patch.object(project, "run", return_value=(0, "", "")) as r:
+            self.assertEqual(project.set_visibility("acme", 1, "PUBLIC"), (True, ""))
+        self.assertIn("PUBLIC", r.call_args[0][0])
+        with mock.patch.object(project, "run", return_value=(1, "", "denied")):
+            self.assertEqual(project.set_visibility("acme", 1, "PRIVATE"), (False, "denied"))
+
+    def test_create_project_links_aligns_and_remembers(self):
+        calls = []
+
+        def fake_run(args, timeout=60):
+            calls.append(args[:3])
+            return (0, json.dumps({"number": 3}), "") if args[2] == "create" else (0, "", "")
+        with mock.patch.object(project, "run", side_effect=fake_run), mock.patch.object(project, "ctx") as c:
+            number, msgs = project.create_project("acme", "app", {"visibility": "public"}, None)
+        self.assertEqual(number, 3)
+        self.assertEqual([c[2] for c in calls], ["create", "link", "edit"])
+        c.assert_called_once_with("note", "project", "acme/3")
+        self.assertIn("visibility PUBLIC", msgs)
+
+    def test_create_project_reports_partial_failures(self):
+        def fake_run(args, timeout=60):
+            return (0, json.dumps({"number": 3}), "") if args[2] == "create" else (1, "", "denied")
+        with mock.patch.object(project, "run", side_effect=fake_run), mock.patch.object(project, "ctx"):
+            _, msgs = project.create_project("acme", "app", {"visibility": "private"}, "Board")
+        self.assertTrue(any("LINK FAILED" in m for m in msgs) and any("VISIBILITY FAILED" in m for m in msgs))
+        with mock.patch.object(project, "run", return_value=(1, "", "nope")):
+            with self.assertRaises(RuntimeError):
+                project.create_project("acme", "app", {}, None)
+
+
 class Main(unittest.TestCase):
     def setUp(self):
         env = mock.patch.dict(os.environ)
@@ -239,6 +297,9 @@ class Main(unittest.TestCase):
             "fetch_open_issues": mock.patch.object(project, "fetch_open_issues", side_effect=lambda o, n: self.issues),
             "add_to_project": mock.patch.object(project, "add_to_project", return_value=(True, "")),
             "set_parent": mock.patch.object(project, "set_parent", return_value=(True, "")),
+            "project_visibility": mock.patch.object(project, "project_visibility", return_value="PUBLIC"),
+            "set_visibility": mock.patch.object(project, "set_visibility", return_value=(True, "")),
+            "create_project": mock.patch.object(project, "create_project", return_value=(5, ["created Project acme/5"])),
         }
         self.m = {k: p.start() for k, p in patches.items()}
         for p in patches.values():
@@ -256,6 +317,53 @@ class Main(unittest.TestCase):
         self.assertEqual(json.loads(out)["project_number"], 2)
         self.assertIn("Project: acme/2 (source: linked)", err)
         self.assertIn("personal, public", err)
+
+    def test_visibility_command(self):
+        self.assertEqual(self.call("visibility")[0], 0)  # public project, public repo
+        self.m["project_visibility"].return_value = "PRIVATE"
+        rc, out, err = self.call("visibility")
+        self.assertEqual(rc, 1)
+        self.assertIn("Dry run", out)
+        self.assertIn("WARNING: Project is PRIVATE", err)
+        self.m["set_visibility"].assert_not_called()
+        rc, out, _ = self.call("visibility", "--apply")
+        self.assertEqual((rc, "ok" in out), (0, True))
+        self.m["set_visibility"].assert_called_once_with("acme", 2, "PUBLIC")
+        self.m["set_visibility"].return_value = (False, "denied")
+        self.assertEqual(self.call("visibility", "--apply")[0], 2)
+
+    def test_mismatch_warns_on_every_command(self):
+        self.m["project_visibility"].return_value = "PRIVATE"
+        self.assertIn("they must match", self.call("orphans")[2])
+        self.m["project_visibility"].return_value = None
+        self.assertNotIn("WARNING", self.call("orphans")[2])
+
+    def test_create_command(self):
+        rc, out, _ = self.call("create", "--title", "Board")
+        self.assertEqual((rc, "created Project" in out), (0, True))
+        self.m["create_project"].assert_called_once_with("acme", "app", self.kind, "Board")
+        self.m["create_project"].return_value = (5, ["LINK FAILED: x"])
+        self.assertEqual(self.call("create")[0], 2)
+        self.kind = {"writable": False}
+        self.assertEqual(self.call("create")[0], 2)
+
+    def test_use_records_the_users_choice(self):
+        with mock.patch.object(project, "ctx") as c:
+            rc, out, err = self.call("use", "acme/3")
+        self.assertEqual(rc, 0)
+        c.assert_called_once_with("note", "project", "acme/3")
+        self.assertIn("Project acme/3 recorded for acme/app", out)
+        self.assertIn("chosen by the user", err)
+        self.m["project_visibility"].side_effect = ["PRIVATE", "PRIVATE"]
+        with mock.patch.object(project, "ctx"):
+            self.assertIn("WARNING: Project is PRIVATE", self.call("use", "acme/3")[2])
+
+    def test_use_rejects_bad_or_unreadable_projects(self):
+        rc, _, err = self.call("use", "nonsense")
+        self.assertEqual((rc, "OWNER/NUMBER" in err), (2, True))
+        self.m["project_visibility"].return_value = None
+        rc, _, err = self.call("use", "acme/99")
+        self.assertEqual((rc, "not found" in err), (2, True))
 
     def test_unknown_profile_is_labelled_unknown(self):
         self.kind = {"writable": True}
