@@ -2,6 +2,15 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [Unreleased]
+
+### Added
+- `issue-lifecycle/project.py`: every issue is driven by the repository's GitHub Project (found automatically, always announced, remembered as note `project`) and attached to an epic through native sub-issues. Commands `resolve`, `attach`, `orphans`, `backfill` (dry-run by default). Detects a token without the `project` scope.
+
+### Changed
+- `repo-context`: `resolve` returns a repository profile `kind` (personal/organization, public/private/internal, fork, archived, writable, rules) from `gh repo view`; `project.py` and the issue/traceability skills adapt to it and stop on non-writable repositories.
+- `issue-lifecycle`, `dev-traceability`, `repo-context`: Project and epic attachment is a mandatory step of the issue flow and a traceability-chain control.
+
 ## [0.1.0] - 2026-11-05
 
 ### Added

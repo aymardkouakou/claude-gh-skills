@@ -82,6 +82,31 @@ class Memory(unittest.TestCase):
         self.assertFalse(ctx.looks_secret("PRs go develop to sandbox to main"))
 
 
+class Classify(unittest.TestCase):
+    def test_personal_private(self):
+        k = ctx.classify_repo({"visibility": "private", "in_org": False, "permission": "ADMIN"})
+        self.assertEqual((k["owner_type"], k["visibility"], k["writable"]), ("personal", "private", True))
+        self.assertTrue(any("Personal" in r for r in k["rules"]))
+
+    def test_org_public(self):
+        k = ctx.classify_repo({"visibility": "public", "in_org": True, "permission": "WRITE"})
+        self.assertEqual(k["owner_type"], "organization")
+        self.assertTrue(any("world-readable" in r for r in k["rules"]))
+
+    def test_not_writable(self):
+        self.assertFalse(ctx.classify_repo({"in_org": False, "archived": True, "permission": "ADMIN"})["writable"])
+        self.assertFalse(ctx.classify_repo({"in_org": True, "permission": "READ"})["writable"])
+        self.assertFalse(ctx.classify_repo({"in_org": True, "permission": "WRITE", "issues_enabled": False})["writable"])
+
+    def test_unknown_is_not_guessed(self):
+        k = ctx.classify_repo({})
+        self.assertIsNone(k["owner_type"])
+        self.assertFalse(k["writable"])
+
+    def test_legacy_private_flag(self):
+        self.assertEqual(ctx.classify_repo({"private": True})["visibility"], "private")
+
+
 if __name__ == "__main__":
     unittest.main()
 

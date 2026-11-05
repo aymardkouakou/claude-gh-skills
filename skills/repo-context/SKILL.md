@@ -30,8 +30,15 @@ Every skill that touches GitHub resolves the repository **first**, through this 
 - Always pass `--repo "$(~/.claude/skills/repo-context/ctx.py repo)"` to `gh` commands that accept it. For several repositories (monorepo + submodules), resolve each one separately.
 - Check `permission` before writing (`READ` cannot open PRs or push).
 - **Memory is local and secret-free**: `~/.claude/skill-state/repos/*.json` (override with `CLAUDE_SKILL_STATE`). It stores repository names, default branch, cached labels and short verified notes (for example "PRs go develop → sandbox → main", "labels: type:*, priority:*"). Never store tokens, passwords or personal data; `note` refuses secret-looking text.
+- The GitHub Project driving the repository is stored as note `project` = `OWNER/NUMBER`; `issue-lifecycle/project.py` determines it automatically when unset and states it every time.
 - Use `note` only for facts you verified in this repository (workflow rules, label scheme, CI job names, merge style). Do not store opinions.
 - `forget` removes a repository from memory on request.
+
+## Repository profile (adapt actions to it)
+`ctx.py resolve` returns `kind`: `owner_type` (`personal` | `organization`), `visibility` (`public` | `private` | `internal`), `fork`, `archived`, `writable` and `rules`, derived from `gh repo view` (`visibility`, `isInOrganization`, `isArchived`, `hasIssuesEnabled`, `hasProjectsEnabled`, `viewerPermission`). Read `rules` before acting and apply them; never assume the type when it is `null`.
+- Public repository: stricter masking, no vulnerability details in issues (private security advisory instead).
+- Personal vs organization: Project owner, availability of issue types and rulesets, review expectations.
+- Fork, archived, issues disabled or read-only permission: `writable: false` means stop and tell the user before any write.
 
 ## Language of GitHub output
 The skills themselves are written in English, but **what is published on GitHub** (issues, journal comments, PR descriptions, release notes) is written in a language the user chooses, per repository.

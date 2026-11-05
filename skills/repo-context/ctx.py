@@ -83,7 +83,7 @@ def save(path, data):
 def detect(explicit, cwd):
     """Return (info, source). Order: explicit/GH_REPO -> gh in cwd -> git remote -> remembered."""
     explicit = explicit or os.environ.get("GH_REPO")
-    fields = "nameWithOwner,url,isPrivate,defaultBranchRef,viewerPermission,hasIssuesEnabled,isFork"
+    fields = "nameWithOwner,url,isPrivate,defaultBranchRef,viewerPermission,hasIssuesEnabled,isFork,visibility,isInOrganization,isArchived,hasProjectsEnabled"
     args = ["gh", "repo", "view"] + ([explicit] if explicit else []) + ["--json", fields]
     rc, out, err = run(args, cwd)
     if rc == 0:
@@ -95,6 +95,8 @@ def detect(explicit, cwd):
                 "host": host, "owner": owner, "repo": repo, "url": d["url"], "private": d.get("isPrivate"),
                 "default_branch": (d.get("defaultBranchRef") or {}).get("name"), "permission": d.get("viewerPermission"),
                 "issues_enabled": d.get("hasIssuesEnabled"), "fork": d.get("isFork"),
+                "visibility": (d.get("visibility") or "").lower() or None, "in_org": d.get("isInOrganization"),
+                "archived": d.get("isArchived"), "projects_enabled": d.get("hasProjectsEnabled"),
             }, ("explicit" if explicit else "gh")
         except (ValueError, KeyError):
             pass
@@ -123,6 +125,41 @@ def auth_state(host):
     return rc == 0
 
 
+def classify_repo(rec):
+    """Repository profile and the rules that follow from it (gh best practices). Unknown facts stay None."""
+    vis = rec.get("visibility") or (None if rec.get("private") is None else ("private" if rec["private"] else "public"))
+    in_org = rec.get("in_org")
+    perm = rec.get("permission")
+    rules = []
+    if in_org is False:
+        rules.append("Personal repository: Projects and sub-issues belong to the user account; issue types and org-level "
+                     "Projects do not exist; solo account, so the reviewer-different-from-author control needs a second human or a documented exception.")
+    elif in_org:
+        rules.append("Organization repository: prefer the organization Project (`gh project --owner ORG`), issue types and rulesets; "
+                     "enforce review and CODEOWNERS.")
+    if vis == "public":
+        rules.append("Public: everything written (issues, comments, logs) is world-readable and indexed; mask more strictly, "
+                     "never post vulnerability details (use a private security advisory).")
+    elif vis == "internal":
+        rules.append("Internal: visible to the whole enterprise; treat as semi-public, no customer data.")
+    elif vis == "private":
+        rules.append("Private: branch protection and rulesets may need a paid plan; verify with the API before promising enforcement.")
+    if rec.get("fork"):
+        rules.append("Fork: issues are usually disabled and PRs target upstream; pass --repo explicitly and confirm the target before any write.")
+    if rec.get("archived"):
+        rules.append("Archived: read-only, do not write anything.")
+    if rec.get("issues_enabled") is False:
+        rules.append("Issues are disabled on this repository: ask before enabling them or choosing another repository.")
+    if rec.get("projects_enabled") is False:
+        rules.append("Repository-level Projects are disabled; owner-level Projects v2 still work, verify before attaching.")
+    if perm in ("READ", "TRIAGE"):
+        rules.append(f"Permission {perm}: cannot push or merge" + ("; can label and triage issues." if perm == "TRIAGE" else "; comment only."))
+    owner_type = None if in_org is None else ("organization" if in_org else "personal")
+    return {"owner_type": owner_type, "visibility": vis, "fork": bool(rec.get("fork")), "archived": bool(rec.get("archived")),
+            "writable": not rec.get("archived") and perm not in ("READ", None) and rec.get("issues_enabled") is not False,
+            "rules": rules}
+
+
 def resolve(explicit=None, cwd=None, touch=True):
     cwd = cwd or os.getcwd()
     info, source = detect(explicit, cwd)
@@ -130,7 +167,8 @@ def resolve(explicit=None, cwd=None, touch=True):
         return None
     key = key_of(info["host"], info["owner"], info["repo"])
     rec = load(REPOS / (key + ".json")) or {"first_seen": int(time.time()), "uses": 0, "notes": {}, "labels": [], "paths": []}
-    for k in ("host", "owner", "repo", "url", "private", "default_branch", "permission", "issues_enabled", "fork"):
+    for k in ("host", "owner", "repo", "url", "private", "default_branch", "permission", "issues_enabled", "fork",
+              "visibility", "in_org", "archived", "projects_enabled"):
         if info.get(k) is not None:
             rec[k] = info[k]
     if touch:
@@ -145,10 +183,13 @@ def resolve(explicit=None, cwd=None, touch=True):
         "url": rec.get("url"), "private": rec.get("private"), "default_branch": rec.get("default_branch"),
         "permission": rec.get("permission"), "authenticated": auth_state(info["host"]), "source": source,
         "uses": rec.get("uses"), "notes": rec.get("notes", {}), "cached_labels": len(rec.get("labels", [])),
+        "kind": classify_repo(rec),
         "language": get_language(rec), "commit_language": get_language(rec, commit=True),
     }
     if out["language"] is None:
         out["language_hint"] = "Not set: ask the user once which language to use on GitHub, then run `ctx.py lang set CODE`."
+    if out["kind"]["owner_type"] is None:
+        out["kind_hint"] = "Repository type unknown (gh did not confirm it): do not assume personal or organization."
     if source in ("remembered", "explicit-unverified"):
         out["warning"] = "Repository not confirmed by gh in this directory: ask the user to confirm before any write."
     return out

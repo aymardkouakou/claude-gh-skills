@@ -10,7 +10,7 @@ Goal: every delivered change can be explained and proven, from requirement to pr
 The project's own branch and PR flow (CLAUDE.md, CONTRIBUTING, repo-context `notes`) is authoritative; this skill adds to it. Never commit or push without the user's request.
 
 ## Context
-`REPO=$(~/.claude/skills/repo-context/ctx.py repo)`; use `--repo "$REPO"` for every `gh` call. Ask the user before any write if the repository is not confirmed by `gh`. Save verified workflow facts with `ctx.py note` (for example "promotion flow: develop → sandbox → main").
+`REPO=$(~/.claude/skills/repo-context/ctx.py repo)`; use `--repo "$REPO"` for every `gh` call. Ask the user before any write if the repository is not confirmed by `gh`. Adapt controls to the repository profile (`ctx.py resolve` → `kind`: personal or organization, public/private/internal, fork, archived): for example a solo personal account cannot satisfy "reviewer different from author" and needs a documented exception, and a public repository gets stricter masking. Save verified workflow facts with `ctx.py note` (for example "promotion flow: develop → sandbox → main").
 
 Language: PR descriptions, change records and reports published in the repository follow `ctx.py lang` (ask once if unset); commit messages follow `ctx.py lang --commit` (default English). The skill files stay in English.
 
@@ -19,7 +19,7 @@ Language: PR descriptions, change records and reports published in the repositor
 | # | Link | Expected evidence | Where |
 |---|---|---|---|
 | 1 | Requirement or need | stable identifier (`REQ-…`, `TB-…`, `SEC-…`) | specification, issue |
-| 2 | Issue | purpose, acceptance criteria, risk, priority | GitHub Issues |
+| 2 | Issue | purpose, acceptance criteria, risk, priority; **in the repository Project and under an epic** | GitHub Issues + Project |
 | 3 | Branch and commits | Conventional Commits in English, `Refs #<n>` | git |
 | 4 | Pull request | template filled: changes, risks, tests, rollback | GitHub PR |
 | 5 | Review | at least one reviewer **different from the author**; security review in sensitive areas | GitHub PR |
@@ -31,7 +31,7 @@ Language: PR descriptions, change records and reports published in the repositor
 ## Flow
 
 ### When work starts
-1. Identify the requirement and the issue; otherwise propose opening one (`issue-lifecycle`, `references/issue-template.md`). No change without an issue, except an emergency fix (below).
+1. Identify the requirement and the issue; otherwise propose opening one (`issue-lifecycle`, `references/issue-template.md`). No change without an issue, except an emergency fix (below). Every issue is attached to the Project and an epic (`~/.claude/skills/issue-lifecycle/project.py attach <n> --epic <e>`); audit with `project.py orphans`, which must report nothing.
 2. Check the project is initialised (`docs/traceability/` exists, PR template present). Otherwise offer `references/project-init.md`.
 3. Classify the change: **standard** (low risk, repeatable, pre-approved), **normal** (review + approval), **major** (security, money, data, schema, authentication: second approver and written rollback plan).
 
