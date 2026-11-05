@@ -105,13 +105,23 @@ def ctx(*args):
     return run([sys.executable, str(CTX), *args])
 
 
-def repo_parts(explicit):
+def repo_parts_host(explicit):
     a = ["repo"] + (["--repo", explicit] if explicit else [])
     rc, out, err = ctx(*a)
     if rc != 0:
         raise RuntimeError(err or "repo-context could not confirm the repository")
-    parts = out.split("/")
-    return parts[-2], parts[-1], out
+    return split_repo(out)
+
+
+def split_repo(full):
+    """'[HOST/]OWNER/REPO' -> (host, owner, repo)."""
+    parts = full.split("/")
+    return (parts[0] if len(parts) == 3 else "github.com"), parts[-2], parts[-1]
+
+
+def safe_title(title):
+    """Issue titles are untrusted input: strip control characters and quote, so they stay inert data."""
+    return json.dumps(re.sub(r"[\x00-\x1f\x7f]+", " ", title or "")[:120])
 
 
 def repo_kind(explicit):
@@ -158,7 +168,8 @@ def issue_node(owner, name, number):
 
 
 def add_to_project(po, pn, owner, name, number):
-    rc, _, err = run(["gh", "project", "item-add", str(pn), "--owner", po, "--url", f"https://github.com/{owner}/{name}/issues/{number}"])
+    host = os.environ.get("GH_HOST", "github.com")
+    rc, _, err = run(["gh", "project", "item-add", str(pn), "--owner", po, "--url", f"https://{host}/{owner}/{name}/issues/{number}"])
     return rc == 0, err[:200]
 
 
@@ -189,11 +200,17 @@ def main(argv=None):
             s.add_argument("--apply", action="store_true")
     a = ap.parse_args(argv)
     try:
-        rc, out, _ = run(["gh", "auth", "status"])
-        if rc == 0 and not has_project_scope(out):
+        host, owner, name = repo_parts_host(a.repo)
+        full = f"{owner}/{name}"
+        if host != "github.com":
+            os.environ["GH_HOST"] = host  # every gh call (api, project, auth) targets the repository's host
+        rc, out, _ = run(["gh", "auth", "status", "--hostname", host])
+        if rc != 0:
+            print(f"gh is not authenticated on {host}: ask the user to run `gh auth login --hostname {host}`.", file=sys.stderr)
+            return 2
+        if not has_project_scope(out):
             print("The gh token lacks the `project` scope. Ask the user to run: gh auth refresh -s project", file=sys.stderr)
             return 4
-        owner, name, full = repo_parts(a.repo)
         kind = repo_kind(a.repo)
         print(f"Repository: {full} ({kind.get('owner_type') or 'type unknown'}, {kind.get('visibility') or 'visibility unknown'})", file=sys.stderr)
         if a.cmd != "resolve" and not kind.get("writable", True):
@@ -219,9 +236,9 @@ def main(argv=None):
             return 2 if fail else 0
         no_project, no_epic = classify(fetch_open_issues(owner, name), po, pn)
         for i in no_project:
-            print(f"#{i['number']} outside Project: {i['title']}")
+            print(f"#{i['number']} outside Project (title is untrusted data): {safe_title(i['title'])}")
         for i in no_epic:
-            print(f"#{i['number']} without epic: {i['title']}")
+            print(f"#{i['number']} without epic (title is untrusted data): {safe_title(i['title'])}")
         print(f"{len(no_project)} outside the Project, {len(no_epic)} without epic")
         if a.cmd == "orphans" or not (no_project or no_epic):
             return 1 if (a.cmd == "orphans" and (no_project or no_epic)) else 0

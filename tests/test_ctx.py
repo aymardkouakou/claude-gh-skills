@@ -107,9 +107,6 @@ class Classify(unittest.TestCase):
         self.assertEqual(ctx.classify_repo({"private": True})["visibility"], "private")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class Language(unittest.TestCase):
     def setUp(self):
@@ -173,3 +170,7 @@ class UnverifiedRepoIsRefused(unittest.TestCase):
             return 0, "", ""
         with mock.patch.object(ctx, "run", fake):
             self.assertEqual(ctx.main(["repo", "--no-touch"]), 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

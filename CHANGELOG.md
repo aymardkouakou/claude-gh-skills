@@ -5,7 +5,10 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 ## [Unreleased]
 
 ### Added
-- `issue-lifecycle/project.py`: every issue is driven by the repository's GitHub Project (found automatically, always announced, remembered as note `project`) and attached to an epic through native sub-issues. Commands `resolve`, `attach`, `orphans`, `backfill` (dry-run by default). Detects a token without the `project` scope.
+- `issue-lifecycle/project.py`: every issue is driven by the repository's GitHub Project (found automatically, always announced, remembered as note `project`) and attached to an epic through native sub-issues. Commands `resolve`, `attach`, `orphans`, `backfill` (dry-run by default). Detects a token without the `project` scope. Unit tests cover 100% of `project.py` and `repo-context/ctx.py`.
+
+### Security
+- `project.py`: honours the repository host (GitHub Enterprise) for every `gh` call and issue URL; issue titles are sanitised, quoted and labelled as untrusted data before being printed.
 
 ### Changed
 - `repo-context`: `resolve` returns a repository profile `kind` (personal/organization, public/private/internal, fork, archived, writable, rules) from `gh repo view`; `project.py` and the issue/traceability skills adapt to it and stop on non-writable repositories.
