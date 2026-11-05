@@ -33,7 +33,7 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-_spec = importlib.util.spec_from_file_location("project", Path(__file__).with_name("project.py"))
+_spec = importlib.util.spec_from_file_location("project", Path(__file__).resolve().parent.parent / "project-tracking" / "project.py")
 project = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(project)
 
@@ -386,10 +386,13 @@ def main(argv=None):
             print("\n".join(render_report(m, f"{po}/{pn}")))
             if a.post:
                 status = a.status or derive_status(m)
-                if a.with_titles and not titles_may_be_published(project.project_visibility(po, pn) == "PUBLIC",
-                                                                kind.get("visibility") == "public", items, full):
-                    raise RuntimeError("refused: titles would be published on a public Project that shows items from "
-                                       "other or non-public repositories. Post the counts only (drop --with-titles).")
+                if a.with_titles:
+                    vis = project.project_visibility(po, pn)
+                    if vis is None:  # fail closed: unknown visibility is treated as the most exposed case
+                        raise RuntimeError("refused: cannot determine the Project visibility. Post the counts only (drop --with-titles).")
+                    if not titles_may_be_published(vis == "PUBLIC", kind.get("visibility") == "public", items, full):
+                        raise RuntimeError("refused: titles would be published on a public Project that shows items from "
+                                           "other or non-public repositories. Post the counts only (drop --with-titles).")
                 lines = render_report(m, f"{po}/{pn}", titles=a.with_titles)
                 q = ("mutation($i:CreateProjectV2StatusUpdateInput!){createProjectV2StatusUpdate(input:$i){statusUpdate{id}}}")
                 project.gh_graphql_json(q, {"i": {"projectId": info["id"], "status": status, "body": "\n".join(lines)}})

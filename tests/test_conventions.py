@@ -46,7 +46,7 @@ class Conventions(unittest.TestCase):
                 self.assertIsNone(re.search(r"ghp_[A-Za-z0-9]{20}|AKIA[0-9A-Z]{12}|-----BEGIN [A-Z ]*PRIVATE", t), f.name)
 
     def test_manual_skills_are_the_risky_ones(self):
-        for name in ("incident-response", "secrets-hygiene"):
+        for name in ("incident-response", "secrets-hygiene", "change-management"):
             fm, _ = split((ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8"))
             self.assertIn("disable-model-invocation: true", fm, name)
 
@@ -59,6 +59,58 @@ class Conventions(unittest.TestCase):
             if d.name in ("skill-learning", "repo-context"):
                 continue
             self.assertIn("skill-learning/learn.py log", (d / "SKILL.md").read_text(encoding="utf-8"), d.name)
+
+
+class Granularity(unittest.TestCase):
+    """One responsibility per skill: short SKILL.md, long material in references/, triggers in the description."""
+
+    def test_skill_files_stay_short(self):
+        for d in SKILLS:
+            lines = (d / "SKILL.md").read_text(encoding="utf-8").count("\n")
+            self.assertLessEqual(lines, 70, f"{d.name}: {lines} lines, move detail to references/")
+
+    def test_description_says_when_to_use_and_when_not(self):
+        for d in SKILLS:
+            fm, _ = split((d / "SKILL.md").read_text(encoding="utf-8"))
+            desc = re.search(r"(?m)^description: (.+)$", fm).group(1)
+            self.assertRegex(desc, r"Use (for|when|before|after)", f"{d.name}: no trigger sentence")
+            self.assertRegex(desc, r"(?i)\b(not for|belongs? to|belong to|use [a-z-]+ first|read-only)\b", f"{d.name}: no boundary")
+            self.assertLessEqual(len(desc), 900, f"{d.name}: description too long")
+
+    def test_scripts_live_with_their_skill_and_documented_paths_exist(self):
+        for rel in ("project-tracking/project.py", "project-board/board.py", "issue-lifecycle/journal.sh",
+                    "dev-traceability/check-refs.sh", "repo-context/ctx.py", "skill-learning/learn.py"):
+            self.assertTrue((ROOT / "skills" / rel).exists(), rel)
+        self.assertFalse((ROOT / "skills" / "issue-lifecycle" / "project.py").exists())
+
+
+class DocumentationFirst(unittest.TestCase):
+    """The README and the process documents stay in step with the skills (owner's rule: docs before commit and release)."""
+
+    def test_readme_lists_every_skill_and_no_removed_one(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for d in SKILLS:
+            self.assertIn(f"skills/{d.name}/SKILL.md", readme, f"README does not link {d.name}")
+        table = re.findall(r"\]\(skills/([a-z-]+)/SKILL\.md\)", readme)
+        self.assertEqual(sorted(set(table)), sorted(d.name for d in SKILLS))
+        count = {"Eleven": 11, "Ten": 10, "Twelve": 12, "Nine": 9, "Seven": 7}
+        word = re.search(r"^(\w+) \[Agent Skills\]", readme, re.M).group(1)
+        self.assertEqual(count.get(word), len(SKILLS), f"README says {word} skills, there are {len(SKILLS)}")
+        self.assertIn(f"skills-{len(SKILLS)}-blue", readme)
+
+    def test_documented_script_paths_exist(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for m in re.finditer(r"~/\.claude/skills/([a-z-]+)/([\w.-]+)", readme):
+            self.assertTrue((ROOT / "skills" / m.group(1) / m.group(2)).exists(), m.group(0))
+
+    def test_process_documents_state_the_rule(self):
+        self.assertIn("Documentation first", (ROOT / "CONVENTIONS.md").read_text(encoding="utf-8"))
+        self.assertIn("documentation", (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8").lower())
+
+    def test_changelog_has_a_section_for_every_manifest_version(self):
+        import json
+        version = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())["version"]
+        self.assertIn(f"## [{version}]", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"))
 
 
 class Distribution(unittest.TestCase):

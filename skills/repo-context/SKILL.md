@@ -30,23 +30,13 @@ ${CLAUDE_SKILL_DIR}/ctx.py show | list | forget [OWNER/REPO]
 - Always pass `--repo "$(${CLAUDE_SKILL_DIR}/ctx.py repo)"` to `gh` commands that accept it. For several repositories (monorepo + submodules), resolve each one separately.
 - Check `permission` before writing (`READ` cannot open PRs or push).
 - **Memory is local and secret-free**: `~/.claude/skill-state/repos/*.json` (override with `CLAUDE_SKILL_STATE`). It stores repository names, default branch, cached labels and short verified notes (for example "PRs go develop → sandbox → main", "labels: type:*, priority:*"). Never store tokens, passwords or personal data; `note` refuses secret-looking text.
-- The GitHub Project driving the repository is stored as note `project` = `OWNER/NUMBER`; `issue-lifecycle/project.py` determines it automatically when unset and states it every time.
+- The GitHub Project driving the repository is stored as note `project` = `OWNER/NUMBER`; `project-tracking` only suggests a candidate and the user confirms it (`project.py use`), then states it every time.
 - Use `note` only for facts you verified in this repository (workflow rules, label scheme, CI job names, merge style). Do not store opinions.
 - `forget` removes a repository from memory on request.
 
-## Repository profile (adapt actions to it)
-`ctx.py resolve` returns `kind`: `owner_type` (`personal` | `organization`), `visibility` (`public` | `private` | `internal`), `fork`, `archived`, `writable` and `rules`, derived from `gh repo view` (`visibility`, `isInOrganization`, `isArchived`, `hasIssuesEnabled`, `hasProjectsEnabled`, `viewerPermission`). Read `rules` before acting and apply them; never assume the type when it is `null`.
-- Public repository: stricter masking, no vulnerability details in issues (private security advisory instead).
-- Personal vs organization: Project owner, availability of issue types and rulesets, review expectations.
-- Fork, archived, issues disabled or read-only permission: `writable: false` means stop and tell the user before any write.
-
-## Language of GitHub output
-The skills themselves are written in English, but **what is published on GitHub** (issues, journal comments, PR descriptions, release notes) is written in a language the user chooses, per repository.
-- Resolution order: `CLAUDE_SKILL_LANG` (one-off override) → repository setting → global setting → unset.
-- Unset: **always stop and ask the user to confirm** (never default, infer or write first) ("Which language for issues and PRs in this repository?"), then save it: `ctx.py lang set fr` (this repository) or `ctx.py lang set fr --global`. Do not guess from the conversation language.
-- An explicit request in the conversation ("write this issue in English") wins for that piece of text only; do not change the saved setting unless asked.
-- Commit messages have their own setting: `ctx.py lang --commit` (default `en`; change with `lang set CODE --commit`).
-- Write the text directly in the chosen language, translating the English templates and headings; keep identifiers, commands, paths and error messages verbatim.
+## Profile and language (details in `references/`)
+- `ctx.py resolve` returns `kind` (personal or organization, public/private/internal, fork, archived, `writable`, `rules`): read it and apply `rules`; `writable: false` means stop. See `references/profile.md`.
+- What is published on GitHub is written in the language the user chose for the repository. **Unset (`ctx.py lang` exits 3) is a hard stop: ask the user to confirm, never default or infer.** See `references/language.md`.
 
 ## Failure modes
 - `gh` not installed or not authenticated: say so and stop; give the user the command to run (`gh auth login`), do not work around it.

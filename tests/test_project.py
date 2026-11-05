@@ -13,7 +13,7 @@ from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-spec = importlib.util.spec_from_file_location("project", ROOT / "skills" / "issue-lifecycle" / "project.py")
+spec = importlib.util.spec_from_file_location("project", ROOT / "skills" / "project-tracking" / "project.py")
 project = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(project)
 
@@ -623,7 +623,7 @@ class Main(unittest.TestCase):
 
 class EntryPoint(unittest.TestCase):
     def test_scripts_run_as_programs(self):
-        for rel in ("skills/issue-lifecycle/project.py", "skills/repo-context/ctx.py"):
+        for rel in ("skills/project-tracking/project.py", "skills/repo-context/ctx.py"):
             with mock.patch.object(sys, "argv", [rel, "no-such-command"]), contextlib.redirect_stderr(io.StringIO()):
                 with self.assertRaises(SystemExit) as e:
                     runpy.run_path(str(ROOT / rel), run_name="__main__")

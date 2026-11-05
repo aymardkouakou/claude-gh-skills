@@ -2,6 +2,25 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.7.0] - 2026-11-05
+
+### Added
+- Process rule "documentation first" in `CONVENTIONS.md` and `CONTRIBUTING.md` (release checklist), with tests that the README lists every skill, documents existing script paths, and that the changelog covers the manifest version.
+- Tests guarding granularity: `SKILL.md` of 70 lines at most, a trigger sentence and a boundary in every description.
+
+### Changed
+- **Skills split by responsibility** (eleven skills, each with a short `SKILL.md`, long material in `references/`):
+  - `issue-lifecycle` keeps the error lifecycle; Project and epic handling moves to the new `project-tracking` (`project.py`), fields, views and reports to the new `project-board` (`board.py`).
+  - `dev-traceability` keeps the requirement-to-merge chain; the change record, approval, deployment and emergency flow move to the new `change-management` (manual invocation); the compliance report moves to `references/`.
+  - `repo-hardening` (new) takes the GitHub repository controls out of `security-audit`, which is now about applications only.
+  - `repo-context` moves the profile and language details to `references/`.
+- Every skill description names its triggers (English and French) and what it is *not* for, so the right skill loads.
+- Scripts moved with their skills: `project.py` to `project-tracking/`, `board.py` to `project-board/` (update any hard-coded path).
+
+### Fixed
+- `dev-traceability` pointed to an issue template it did not contain.
+- `board.py report --post --with-titles` fails closed when the Project visibility cannot be read.
+
 ## [0.6.1] - 2026-11-05
 
 ### Security

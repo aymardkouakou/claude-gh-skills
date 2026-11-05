@@ -3,16 +3,18 @@
 **Claude Code skills for traceable, GitHub-driven development: every issue in a Project and under an epic, every change linked from requirement to deployment, plus security audit, secrets hygiene and incident response.**
 
 [![release](https://img.shields.io/github/v/release/aymardkouakou/claude-gh-skills?display_name=tag&sort=semver&cacheSeconds=600)](https://github.com/aymardkouakou/claude-gh-skills/releases)
-![skills](https://img.shields.io/badge/skills-7-blue)
+![skills](https://img.shields.io/badge/skills-11-blue)
 [![license](https://img.shields.io/github/license/aymardkouakou/claude-gh-skills)](LICENSE)
 ![python](https://img.shields.io/badge/python-%E2%89%A53.9%20stdlib%20only-informational)
 
-Seven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (171 tests, 100 % statement coverage of the Python helpers, Python 3.9 to 3.12) and installed globally by symlink.
+Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (100 % statement coverage of the Python helpers, Python 3.9 to 3.12) and installed globally by symlink.
 
 ## Why use them
 
-- **No orphan issues.** `issue-lifecycle` attaches each issue to the repository's GitHub Project and to an epic (native sub-issues). The Project and the GitHub language are **your choice**: the skill suggests a candidate, asks you to confirm, and always says which one it uses. A Project is created as visible as its repository. Epics are parent issues with **native sub-issues**, nested up to 8 levels; `project.py tree` shows them with their progress and `backfill` repairs existing issues and open pull requests.
-- **Auditable changes.** `dev-traceability` enforces requirement → issue → commit → PR → review → tests → deployment → verification, with a change register and traceability matrix mapped to ISO/IEC 27001, ISO 9001, ISO/IEC/IEEE 12207, ITIL 4 and SOC 2 (evidence, not certification).
+- **No orphan issues.** `project-tracking` attaches each issue to the repository's GitHub Project and to an epic (native sub-issues). The Project and the GitHub language are **your choice**: the skill suggests a candidate, asks you to confirm, and always says which one it uses. A Project is created as visible as its repository. Epics are parent issues with **native sub-issues**, nested up to 8 levels; `project.py tree` shows them with their progress and `backfill` repairs existing issues and open pull requests.
+- **Auditable changes.** `dev-traceability` traces requirement → issue → commit → PR → review → tests with a traceability matrix; `change-management` adds the change record, approval by someone other than the author, deployment verdict and emergency flow. Both map to ISO/IEC 27001, ISO 9001, ISO/IEC/IEEE 12207, ITIL 4 and SOC 2 (evidence, not certification).
+- **A Project that is worth reading.** `project-board` builds the fields and 15 views and reports progress; `repo-hardening` audits the repository's own protections (branch rules, secret scanning, Actions permissions).
+- **One job per skill.** Eleven short skills with precise triggers instead of a few large ones: the right one loads, the rest stay out of the way.
 - **Never the wrong repository.** `repo-context` resolves the repo through `gh`, classifies it (personal or organization, public / private / internal, fork, archived, writable) and the other skills adapt to that profile.
 - **Safe by default.** No secret in output, writes refused on unverified or read-only repositories, destructive operations always confirmed.
 - **They get better.** `skill-learning` logs outcomes locally and drafts reviewed improvements.
@@ -21,15 +23,19 @@ Seven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Cl
 
 | Skill | Use it when you want to… | Also triggers on (French) |
 |---|---|---|
-| [`repo-context`](skills/repo-context/SKILL.md) | resolve and remember the active GitHub repository and its profile | "quel dépôt", "repo actif" |
-| [`issue-lifecycle`](skills/issue-lifecycle/SKILL.md) | record an error as an issue, keep a timestamped journal, fix, verify, close; attach to Project and epic | "ouvre une issue", "bug récurrent" |
-| [`dev-traceability`](skills/dev-traceability/SKILL.md) | deliver a feature, fix or release with a full evidence chain | "matrice de traçabilité", "registre des changements" |
-| [`skill-learning`](skills/skill-learning/SKILL.md) | review how skills were used and improve them | "améliore les skills" |
+| [`repo-context`](skills/repo-context/SKILL.md) | resolve and remember the active GitHub repository, its profile and the publishing language | "quel dépôt", "repo actif" |
+| [`issue-lifecycle`](skills/issue-lifecycle/SKILL.md) | record an error as an issue, keep a timestamped journal, fix, verify, close | "ouvre une issue", "bug récurrent" |
+| [`project-tracking`](skills/project-tracking/SKILL.md) | keep issues and PRs in the GitHub Project and under epics (sub-issues), repair orphans | "rattache à l'epic", "issue orpheline" |
+| [`project-board`](skills/project-board/SKILL.md) | build fields and 15 standard views, follow-up reports, status updates, drafts, task lists | "crée les vues", "rapport d'avancement" |
+| [`dev-traceability`](skills/dev-traceability/SKILL.md) | trace a change from requirement to merge, RTM, definition of done, audit evidence | "matrice de traçabilité", "prépare l'audit" |
+| [`change-management`](skills/change-management/SKILL.md) | record, approve, deploy and verify a change in a shared environment | "mise en prod", "registre des changements" |
+| [`repo-hardening`](skills/repo-hardening/SKILL.md) | audit branch protection, secret scanning, Dependabot, CODEOWNERS, Actions permissions | "protège la branche", "durcis le dépôt" |
 | [`security-audit`](skills/security-audit/SKILL.md) | audit an application before a release (read-only) | "audit sécurité", "avant la prod" |
 | [`secrets-hygiene`](skills/secrets-hygiene/SKILL.md) | audit and rotate secrets without reading their values | "rotation des secrets" |
 | [`incident-response`](skills/incident-response/SKILL.md) | handle an incident: qualification, containment, evidence, notifications | "incident", "panne en production" |
+| [`skill-learning`](skills/skill-learning/SKILL.md) | review how skills were used and improve them | "améliore les skills" |
 
-`incident-response` and `secrets-hygiene` change shared systems and are manual-invocation only.
+`incident-response`, `secrets-hygiene` and `change-management` change shared systems and are manual-invocation only. Each skill has one responsibility and a short `SKILL.md`; long material lives in its `references/` folder.
 
 ## Quick start
 
@@ -62,29 +68,29 @@ Update with `git pull && ./install.sh` (symlink install, removed skills are prun
 ```
 
 ```bash
-~/.claude/skills/issue-lifecycle/project.py resolve     # which Project drives this repository (asks you to confirm a candidate)
-~/.claude/skills/issue-lifecycle/project.py use OWNER/N  # record your choice
-~/.claude/skills/issue-lifecycle/project.py create       # new Project, linked, same visibility as the repo
-~/.claude/skills/issue-lifecycle/project.py visibility   # align the Project visibility with the repo (--apply to fix)
-~/.claude/skills/issue-lifecycle/project.py orphans     # open issues/PRs outside the Project, issues without an epic
-~/.claude/skills/issue-lifecycle/project.py tree 12     # sub-issue hierarchy of epic #12, with progress
-~/.claude/skills/issue-lifecycle/project.py attach 31 --epic 12 [--replace]   # add to the Project and make it a sub-issue (--replace: move it)
-~/.claude/skills/issue-lifecycle/project.py attach 40 --pr                    # open pull request -> Project
-~/.claude/skills/issue-lifecycle/project.py detach 31 --epic 12               # remove the sub-issue link
-~/.claude/skills/issue-lifecycle/project.py backfill --epic 12 --apply
+~/.claude/skills/project-tracking/project.py resolve     # which Project drives this repository (asks you to confirm a candidate)
+~/.claude/skills/project-tracking/project.py use OWNER/N  # record your choice
+~/.claude/skills/project-tracking/project.py create       # new Project, linked, same visibility as the repo
+~/.claude/skills/project-tracking/project.py visibility   # align the Project visibility with the repo (--apply to fix)
+~/.claude/skills/project-tracking/project.py orphans     # open issues/PRs outside the Project, issues without an epic
+~/.claude/skills/project-tracking/project.py tree 12     # sub-issue hierarchy of epic #12, with progress
+~/.claude/skills/project-tracking/project.py attach 31 --epic 12 [--replace]   # add to the Project and make it a sub-issue (--replace: move it)
+~/.claude/skills/project-tracking/project.py attach 40 --pr                    # open pull request -> Project
+~/.claude/skills/project-tracking/project.py detach 31 --epic 12               # remove the sub-issue link
+~/.claude/skills/project-tracking/project.py backfill --epic 12 --apply
 ```
 
 ## Project follow-up: views, fields, reports
 
-`board.py` builds the Project once and keeps it useful (all commands are dry-run unless `--apply`):
+`project-board` (`board.py`) builds the Project once and keeps it useful (all commands are dry-run unless `--apply`):
 
 ```bash
-~/.claude/skills/issue-lifecycle/board.py setup  --apply   # fields: Priority, Kind, Estimate, Target date, Iteration
-~/.claude/skills/issue-lifecycle/board.py views  --apply   # the 15 standard views below (idempotent)
-~/.claude/skills/issue-lifecycle/board.py report [--post]  # metrics; --post publishes counts only (no titles)
-~/.claude/skills/issue-lifecycle/board.py set 12 --field Priority --value High
-~/.claude/skills/issue-lifecycle/board.py draft "Plan next iteration" ; board.py drafts ; board.py convert <item-id>
-~/.claude/skills/issue-lifecycle/board.py tasklist 12 --apply [--create]   # `- [ ] #n` checklists -> sub-issues (same repository; --allow-cross-repo for others)
+~/.claude/skills/project-board/board.py setup  --apply   # fields: Priority, Kind, Estimate, Target date, Iteration
+~/.claude/skills/project-board/board.py views  --apply   # the 15 standard views below (idempotent)
+~/.claude/skills/project-board/board.py report [--post]  # metrics; --post publishes counts only (no titles)
+~/.claude/skills/project-board/board.py set 12 --field Priority --value High
+~/.claude/skills/project-board/board.py draft "Plan next iteration" ; board.py drafts ; board.py convert <item-id>
+~/.claude/skills/project-board/board.py tasklist 12 --apply [--create]   # `- [ ] #n` checklists -> sub-issues (same repository; --allow-cross-repo for others)
 ```
 
 | View | Layout | Filter | Answers |

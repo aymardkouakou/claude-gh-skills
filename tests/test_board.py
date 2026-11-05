@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-spec = importlib.util.spec_from_file_location("board", ROOT / "skills" / "issue-lifecycle" / "board.py")
+spec = importlib.util.spec_from_file_location("board", ROOT / "skills" / "project-board" / "board.py")
 board = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(board)
 project = board.project
@@ -370,6 +370,12 @@ class Main(unittest.TestCase):
             self.assertEqual(self.call("report", "--post", "--with-titles")[0], 0)
         self.assertIn('"epic"', self.m["gh_graphql_json"].call_args[0][1]["i"]["body"])
 
+    def test_post_with_titles_fails_closed_when_visibility_is_unknown(self):
+        with mock.patch.object(project, "project_visibility", return_value=None):
+            rc, _, err = self.call("report", "--post", "--with-titles")
+        self.assertEqual((rc, "cannot determine the Project visibility" in err), (2, True))
+        self.m["gh_graphql_json"].assert_not_called()
+
     def test_set(self):
         rc, out, _ = self.call("set", "1", "--field", "priority", "--value", "High")
         self.assertEqual((rc, "Priority = High: ok" in out), (0, True))
@@ -472,7 +478,7 @@ class EntryPoint(unittest.TestCase):
     def test_runs_as_a_program(self):
         with mock.patch.object(sys, "argv", ["board.py", "no-such-command"]), contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit) as e:
-                runpy.run_path(str(ROOT / "skills" / "issue-lifecycle" / "board.py"), run_name="__main__")
+                runpy.run_path(str(ROOT / "skills" / "project-board" / "board.py"), run_name="__main__")
         self.assertEqual(e.exception.code, 2)
 
 

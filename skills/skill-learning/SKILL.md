@@ -1,6 +1,6 @@
 ---
 name: skill-learning
-description: Learn from how skills are actually used so they improve over time - logs the outcome of each skill run and the user's corrections to a local history, summarises success rates and recurring frictions, and drafts reviewed improvements to the skills repository. Use when the user corrects how a skill behaved, after finishing a skill run, or to "review the skills", "améliore les skills", "apprends de mes usages".
+description: Learn from how skills are actually used so they improve over time - logs the outcome of each skill run and the user's corrections to a local history, summarises success rates and recurring frictions, and drafts reviewed improvements to the skills repository. Use when the user corrects how a skill behaved, after finishing a skill run, or to "review the skills", "améliore les skills", "apprends de mes usages". Not for the content of another skill's task: it only reviews how skills behaved.
 ---
 
 # Learning from usage

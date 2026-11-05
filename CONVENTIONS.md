@@ -34,3 +34,5 @@ Runtime memory (active repository, usage history) lives in `~/.claude/skill-stat
 - Semantic versioning with tags `vMAJOR.MINOR.PATCH`; every change listed in `CHANGELOG.md`.
 - Improvements proposed by `skill-learning` go on `improve/<skill>-<topic>` branches and are merged only after the owner's review.
 - Run `python3 -m unittest discover -s tests` before every commit.
+- **Documentation first (owner's rule)**: update the documentation *before* every commit and every release, never after. Checklist: `README.md` (skill table, commands, coverage and limits), the affected `SKILL.md` and `references/`, `CHANGELOG.md`, `CONTRIBUTING.md` / `SECURITY.md` / `CONVENTIONS.md` when the process changes, and the `.claude-plugin/*.json` descriptions and versions. Tests check the parts that can be checked (every skill listed in the README, versions matching the changelog); the rest is a review step.
+- Release: documentation up to date → tests (also under the system Python 3.9) → `claude plugin validate .` → commit → tag `vX.Y.Z` → push → GitHub release with notes → check the README badge.

@@ -1,6 +1,6 @@
 ---
 name: incident-response
-description: Handle a security or operations incident - P1-P4 qualification, containment, evidence preservation, register, notification decision (drafts only), recovery, blameless post-mortem. Use for "incident", "fuite", "fraude", "panne en production", "réclamation grave". Technical follow-up of the cause then goes through issue-lifecycle.
+description: Handle a security or operations incident - P1-P4 qualification, containment, evidence preservation, register, notification decision (drafts only), recovery, blameless post-mortem. Use for "incident", "fuite", "fraude", "panne en production", "réclamation grave". Not for an ordinary bug (use issue-lifecycle); the technical follow-up of the cause then goes through issue-lifecycle, and the emergency change through change-management.
 disable-model-invocation: true
 ---
 
@@ -15,7 +15,7 @@ Containment actions (disable a route, block a user, revoke sessions, stop a serv
 4. **Contain**: propose the narrowest measure (one route, one account), export the configuration before changing it, plan the rollback. Journal every action (type Action).
 5. **Decide on notification** within 4 h: legal and contractual duties of the project (regulator, data-protection authority, customers, partners). Deadlines come from the project's procedure: if absent, say so and do not invent them.
 6. **Eradicate and recover**, then verify (service health and the business-level checks of the project).
-7. **Blameless post-mortem**: timeline, root cause, actions with owner and due date, follow-up issues (`issue-lifecycle`), emergency change record with retroactive review within 48 h (`dev-traceability`).
+7. **Blameless post-mortem**: timeline, root cause, actions with owner and due date, follow-up issues (`issue-lifecycle`), emergency change record with retroactive review within 48 h (`change-management`).
 
 ## Rules
 - No personal data or secret in drafts and registers: technical identifiers only.

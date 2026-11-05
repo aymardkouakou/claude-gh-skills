@@ -1,6 +1,6 @@
 {
   "name": "traceable-dev",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Traceable, GitHub-driven development: issues in Projects and epics, change traceability (ISO 27001/9001/12207, ITIL, SOC 2), security audit.",
   "author": {
     "name": "Aymard Kouakou",
@@ -14,10 +14,11 @@
     "issues",
     "projects",
     "epics",
+    "views",
     "traceability",
-    "iso-27001",
-    "soc2",
+    "change-management",
     "security",
-    "secrets"
+    "secrets",
+    "iso-27001"
   ]
 }

@@ -1,6 +1,6 @@
 ---
 name: security-audit
-description: Application security audit before a release or as a periodic review - route authentication and authorization, default secrets, exposed ports, webhook signatures, sensitive-data access, logging, input validation, dependencies, monitoring. Use for "audit sécurité", "revue d'accès", "avant la prod". Read-only; to fix an exposed secret use secrets-hygiene, for an ongoing incident use incident-response.
+description: Application security audit before a release or as a periodic review - route authentication and authorization, default secrets, exposed ports, webhook signatures, sensitive-data access, logging, input validation, dependencies, monitoring. Use for "audit sécurité", "revue d'accès", "avant la prod". Read-only; GitHub repository settings belong to repo-hardening, an exposed secret to secrets-hygiene, an ongoing incident to incident-response.
 ---
 
 # Security audit
@@ -18,10 +18,9 @@ Read-only by default. No active test on a shared environment without approval. N
 8. **Dependencies and CI**: vulnerability audit, scans blocking or informative (say which), up-to-date images, security updates.
 9. **Monitoring**: real alerts (rules and recipient), business metrics, backups whose restoration has been tested.
 10. **Money** (only if the project handles it): integer amounts, idempotency, atomic debit/credit, reversal instead of edit.
-11. **GitHub repository controls** (read-only, adapt to `ctx.py resolve` → `kind`; a control that needs a paid plan is reported as *not available*, not as a gap): default-branch protection or rulesets (required review, required status checks, no force-push), secret scanning and push protection, Dependabot alerts, `CODEOWNERS`, workflow permissions (`permissions:` least privilege, pinned third-party actions, no `pull_request_target` with untrusted checkout), Actions secrets scoped to Environments. Commands: `gh api repos/$REPO/branches/<default>/protection`, `gh api repos/$REPO/rulesets`, `gh api repos/$REPO --jq .security_and_analysis`, `gh secret list --repo "$REPO"` (names only).
 
 ## Report
-Table: check, result (**compliant / gap / not verified**), evidence (`path:line`), severity (critical/high/medium), action. Distinguish "verified now" from "taken from a document". Line numbers drift: re-read the code before asserting. Critical gaps open an issue (`issue-lifecycle`) and, before a release, block the change record (`dev-traceability`).
+Table: check, result (**compliant / gap / not verified**), evidence (`path:line`), severity (critical/high/medium), action. Distinguish "verified now" from "taken from a document". Line numbers drift: re-read the code before asserting. Critical gaps open an issue (`issue-lifecycle`, then `project-tracking`) and, before a release, block the change record (`change-management`). Repository settings (branch protection, secret scanning, workflow permissions): `repo-hardening`.
 
 ## Never
 Silent fixes, active tests without approval, secrets in the output, "compliant" for something only documented.
