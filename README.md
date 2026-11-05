@@ -55,6 +55,12 @@ Install **all** skills: they call each other through sibling directories (`${CLA
 /plugin marketplace add aymardkouakou/claude-gh-skills
 /plugin install traceable-dev@aymardkouakou-skills
 ```
+`/plugin` is not available in every environment (for example the IDE extensions answer "/plugin isn't available in this environment"). The same steps work from a terminal with the CLI:
+```bash
+claude plugin marketplace add aymardkouakou/claude-gh-skills
+claude plugin install traceable-dev@aymardkouakou-skills
+```
+Use **either** the plugin **or** the symlink install (`./install.sh`), not both: the same skills would load twice, once namespaced.
 Skills are then namespaced (`/traceable-dev:issue-lifecycle`). The manifests pass `claude plugin validate`; the install itself has not been exercised end to end.
 
 Update with `git pull && ./install.sh` (symlink install, removed skills are pruned) or `/plugin update` (plugin); remove with `./install.sh uninstall`. What changed in each version: [releases](https://github.com/aymardkouakou/claude-gh-skills/releases) and [`CHANGELOG.md`](CHANGELOG.md).

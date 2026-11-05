@@ -2,6 +2,11 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.7.1] - 2026-11-05
+
+### Changed
+- README: plugin install also documented with the `claude plugin` CLI for environments where `/plugin` is unavailable, and a warning not to combine it with the symlink install.
+
 ## [0.7.0] - 2026-11-05
 
 ### Added
