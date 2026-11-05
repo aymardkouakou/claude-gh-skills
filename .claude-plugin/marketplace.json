@@ -1,0 +1,14 @@
+{
+  "name": "aymardkouakou-skills",
+  "owner": { "name": "Aymard Kouakou", "url": "https://github.com/aymardkouakou" },
+  "description": "Skills for traceable, GitHub-driven development, security and payment checks.",
+  "plugins": [
+    {
+      "name": "traceable-dev",
+      "source": "./",
+      "description": "Eleven skills for traceable, GitHub-driven development: Project and epic tracking, change traceability, security and payment checks.",
+      "version": "0.3.0",
+      "license": "Apache-2.0"
+    }
+  ]
+}

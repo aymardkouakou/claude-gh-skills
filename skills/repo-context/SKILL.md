@@ -9,13 +9,13 @@ Every skill that touches GitHub resolves the repository **first**, through this 
 
 ## Commands
 ```bash
-~/.claude/skills/repo-context/ctx.py resolve          # JSON: repo, host, default_branch, private, permission, authenticated, source, notes
-~/.claude/skills/repo-context/ctx.py repo             # plain "[HOST/]OWNER/REPO", ready for: gh <cmd> --repo "$(…)"
-~/.claude/skills/repo-context/ctx.py labels [--refresh]
-~/.claude/skills/repo-context/ctx.py note KEY VALUE   # remember a verified fact about this repository
-~/.claude/skills/repo-context/ctx.py lang [--commit]  # language of GitHub output; exit 3 if not chosen yet
-~/.claude/skills/repo-context/ctx.py lang set CODE [--global] [--commit]
-~/.claude/skills/repo-context/ctx.py show | list | forget [OWNER/REPO]
+${CLAUDE_SKILL_DIR}/ctx.py resolve          # JSON: repo, host, default_branch, private, permission, authenticated, source, notes
+${CLAUDE_SKILL_DIR}/ctx.py repo             # plain "[HOST/]OWNER/REPO", ready for: gh <cmd> --repo "$(…)"
+${CLAUDE_SKILL_DIR}/ctx.py labels [--refresh]
+${CLAUDE_SKILL_DIR}/ctx.py note KEY VALUE   # remember a verified fact about this repository
+${CLAUDE_SKILL_DIR}/ctx.py lang [--commit]  # language of GitHub output; exit 3 if not chosen yet
+${CLAUDE_SKILL_DIR}/ctx.py lang set CODE [--global] [--commit]
+${CLAUDE_SKILL_DIR}/ctx.py show | list | forget [OWNER/REPO]
 ```
 
 ## How the repository is found (in order)
@@ -27,7 +27,7 @@ Every skill that touches GitHub resolves the repository **first**, through this 
 ## Rules
 - `ctx.py repo` **refuses (exit 5)** when the repository is only `remembered` or `explicit-unverified`, so scripts such as `journal.sh` can never write to a repository that `gh` did not confirm. Use `--allow-unverified` for read-only purposes only.
 - Read `source` and `authenticated`. If `source` is `remembered` or `explicit-unverified`, or `authenticated` is false, **ask the user** before any write (issue, comment, PR, merge, label). Never run `gh auth login`, `gh auth switch` or `gh auth refresh` without being asked.
-- Always pass `--repo "$(~/.claude/skills/repo-context/ctx.py repo)"` to `gh` commands that accept it. For several repositories (monorepo + submodules), resolve each one separately.
+- Always pass `--repo "$(${CLAUDE_SKILL_DIR}/ctx.py repo)"` to `gh` commands that accept it. For several repositories (monorepo + submodules), resolve each one separately.
 - Check `permission` before writing (`READ` cannot open PRs or push).
 - **Memory is local and secret-free**: `~/.claude/skill-state/repos/*.json` (override with `CLAUDE_SKILL_STATE`). It stores repository names, default branch, cached labels and short verified notes (for example "PRs go develop → sandbox → main", "labels: type:*, priority:*"). Never store tokens, passwords or personal data; `note` refuses secret-looking text.
 - The GitHub Project driving the repository is stored as note `project` = `OWNER/NUMBER`; `issue-lifecycle/project.py` determines it automatically when unset and states it every time.

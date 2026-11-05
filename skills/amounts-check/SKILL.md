@@ -24,4 +24,4 @@ Read the project's schedule and rules first (CLAUDE.md, `procedures/`, fee code)
 Float or unquantised `Decimal` for money, editing a balance in the database (use a traced reversal entry), implicit rounding.
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log amounts-check ok|partial|failed [--note …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log amounts-check ok|partial|failed [--note …]`.

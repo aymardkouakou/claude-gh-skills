@@ -9,7 +9,7 @@ Skills get better from evidence, not guesses. This skill keeps a small local his
 
 ## 1. Log (cheap, one line, at the end of a skill run)
 ```bash
-~/.claude/skills/skill-learning/learn.py log <skill> ok|partial|failed [--note "what was awkward"] [--correction "what the user told me to do differently"]
+${CLAUDE_SKILL_DIR}/learn.py log <skill> ok|partial|failed [--note "what was awkward"] [--correction "what the user told me to do differently"]
 ```
 - `ok`: the skill did what was needed. `partial`: needed manual workarounds or extra steps. `failed`: unusable or wrong.
 - Log a **correction** whenever the user redirects a skill's behaviour ("don't do X", "always do Y first"). Quote it briefly in the user's own meaning; no copy-paste of conversations.
@@ -17,10 +17,10 @@ Skills get better from evidence, not guesses. This skill keeps a small local his
 - The history is local (`~/.claude/skill-state/usage.jsonl`), capped at about 1 MB, never committed, never sent anywhere.
 
 ## 2. Review (when asked, or after roughly 20 logged runs)
-1. `~/.claude/skills/skill-learning/learn.py summary --days 60` for success rates per skill.
+1. `${CLAUDE_SKILL_DIR}/learn.py summary --days 60` for success rates per skill.
 2. `learn.py propose --days 60` for a Markdown brief of corrections and frictions with counts.
 3. Read the affected `SKILL.md`, then draft the **smallest** change that addresses repeated evidence (≥ 2 occurrences, or one explicit user correction). Prefer a sharper rule, a missing step, a better trigger phrase or a pitfall note over adding length.
-4. Apply changes **in the skills repository** (not in `~/.claude/skills`, which is symlinked to it), on a branch named `improve/<skill>-<topic>`, with a Conventional Commit message in English and an entry in `CHANGELOG.md`. Run the repository tests (`python3 -m unittest discover -s tests`).
+4. Apply changes **in the skills repository** (not in the installed copy, which may be a symlink or a plugin cache that updates overwrite), on a branch named `improve/<skill>-<topic>`, with a Conventional Commit message in English and an entry in `CHANGELOG.md`. Run the repository tests (`python3 -m unittest discover -s tests`).
 5. Show the diff and the evidence to the user. **Never merge, push or publish without an explicit request.**
 
 ## 3. Per-repository learning

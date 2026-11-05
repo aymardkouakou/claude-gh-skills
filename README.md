@@ -46,7 +46,14 @@ cd claude-skills
 
 Requirements: `git`, `python3` ≥ 3.9 (standard library only) and, for GitHub features, `gh` logged in. To attach issues to Projects the token needs the `project` scope: `gh auth refresh -s project`.
 
-Install **all** skills: they call each other by path (`~/.claude/skills/<name>/…`), for example `issue-lifecycle` uses `repo-context`.
+Install **all** skills: they call each other through sibling directories (`${CLAUDE_SKILL_DIR}/../<name>/`), for example `issue-lifecycle` uses `repo-context`.
+
+### As a Claude Code plugin
+```text
+/plugin marketplace add aymardkouakou/claude-skills
+/plugin install traceable-dev@aymardkouakou-skills
+```
+Skills are then namespaced (`/traceable-dev:issue-lifecycle`). The manifests pass `claude plugin validate`; the install itself has not been exercised end to end.
 
 Update with `git pull && ./install.sh`; remove with `./install.sh uninstall`.
 

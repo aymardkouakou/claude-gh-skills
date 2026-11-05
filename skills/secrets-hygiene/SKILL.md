@@ -27,4 +27,4 @@ disable-model-invocation: true
 - Production: refuse the deployment while a secret is default or weak.
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log secrets-hygiene ok|partial|failed [--note …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log secrets-hygiene ok|partial|failed [--note …]`.

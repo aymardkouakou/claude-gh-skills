@@ -26,4 +26,4 @@ Table: check, result (**compliant / gap / not verified**), evidence (`path:line`
 Silent fixes, active tests without approval, secrets in the output, "compliant" for something only documented.
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log security-audit ok|partial|failed [--note …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log security-audit ok|partial|failed [--note …]`.

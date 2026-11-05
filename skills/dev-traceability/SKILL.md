@@ -10,7 +10,7 @@ Goal: every delivered change can be explained and proven, from requirement to pr
 The project's own branch and PR flow (CLAUDE.md, CONTRIBUTING, repo-context `notes`) is authoritative; this skill adds to it. Never commit or push without the user's request.
 
 ## Context
-`REPO=$(~/.claude/skills/repo-context/ctx.py repo)`; use `--repo "$REPO"` for every `gh` call. Ask the user before any write if the repository is not confirmed by `gh`. Adapt controls to the repository profile (`ctx.py resolve` → `kind`: personal or organization, public/private/internal, fork, archived): for example a solo personal account cannot satisfy "reviewer different from author" and needs a documented exception, and a public repository gets stricter masking. Save verified workflow facts with `ctx.py note` (for example "promotion flow: develop → sandbox → main").
+`REPO=$(${CLAUDE_SKILL_DIR}/../repo-context/ctx.py repo)`; use `--repo "$REPO"` for every `gh` call. Ask the user before any write if the repository is not confirmed by `gh`. Adapt controls to the repository profile (`ctx.py resolve` → `kind`: personal or organization, public/private/internal, fork, archived): for example a solo personal account cannot satisfy "reviewer different from author" and needs a documented exception, and a public repository gets stricter masking. Save verified workflow facts with `ctx.py note` (for example "promotion flow: develop → sandbox → main").
 
 Language: PR descriptions, change records and reports published in the repository follow `ctx.py lang` (ask once if unset); commit messages follow `ctx.py lang --commit` (default English). The skill files stay in English.
 
@@ -31,13 +31,13 @@ Language: PR descriptions, change records and reports published in the repositor
 ## Flow
 
 ### When work starts
-1. Identify the requirement and the issue; otherwise propose opening one (`issue-lifecycle`, `references/issue-template.md`). No change without an issue, except an emergency fix (below). Every issue is attached to the Project and an epic (`~/.claude/skills/issue-lifecycle/project.py attach <n> --epic <e>`); audit with `project.py orphans`, which must report nothing.
+1. Identify the requirement and the issue; otherwise propose opening one (`issue-lifecycle`, `references/issue-template.md`). No change without an issue, except an emergency fix (below). Every issue is attached to the Project and an epic (`${CLAUDE_SKILL_DIR}/../issue-lifecycle/project.py attach <n> --epic <e>`); audit with `project.py orphans`, which must report nothing.
 2. Check the project is initialised (`docs/traceability/` exists, PR template present). Otherwise offer `references/project-init.md`.
 3. Classify the change: **standard** (low risk, repeatable, pre-approved), **normal** (review + approval), **major** (security, money, data, schema, authentication: second approver and written rollback plan).
 
 ### During development
 - TDD, or at least one targeted test per changed behaviour; run only the relevant tests.
-- Atomic commits, English message, `Refs #<n>`. Check: `~/.claude/skills/dev-traceability/check-refs.sh <base>..<head>` lists commits without an issue reference.
+- Atomic commits, English message, `Refs #<n>`. Check: `${CLAUDE_SKILL_DIR}/check-refs.sh <base>..<head>` lists commits without an issue reference.
 - No secret, token or personal data in the diff, logs or messages.
 - A new dependency: tell the user and record it in the PR.
 
@@ -65,4 +65,4 @@ Table per control: control, target standard, result (compliant / gap / not verif
 Skip links 2 to 6 outside emergencies; self-approve; fabricate or backdate evidence; present a "documented" control as "applied"; put sensitive data in evidence.
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log dev-traceability ok|partial|failed [--note …] [--correction …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log dev-traceability ok|partial|failed [--note …] [--correction …]`.

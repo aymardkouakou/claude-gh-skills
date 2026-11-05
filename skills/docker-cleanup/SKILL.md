@@ -22,4 +22,4 @@ docker volume ls | wc -l     # same before and after: volumes intact
 Space reclaimed (before/after) and confirmation that the number of volumes is unchanged. The next start must re-pull removed images: say so if a stack is to be restarted.
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log docker-cleanup ok|partial|failed [--note …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log docker-cleanup ok|partial|failed [--note …]`.

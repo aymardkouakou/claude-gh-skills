@@ -43,4 +43,4 @@ Table: reference, amount in XOF, gap, age, proposed action, target deadline. Cri
 Edit a balance in the database, apply a rule listed as a "pending arbitration", resend an order with a new key.
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log payment-reconciliation ok|partial|failed [--note …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log payment-reconciliation ok|partial|failed [--note …]`.

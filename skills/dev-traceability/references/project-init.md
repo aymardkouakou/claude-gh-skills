@@ -31,7 +31,7 @@ Refs #<n> · Requirement: <ID>
 Change type: standard | normal | major · Rollback:
 
 ## Checks
-- [ ] Definition of done respected (~/.claude/skills/dev-traceability/references/definition-of-done.md)
+- [ ] Definition of done respected (dev-traceability skill, references/definition-of-done.md)
 - [ ] Targeted tests green (run link) · Independent review requested from:
 - [ ] No secret or personal data
 

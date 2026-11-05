@@ -2,6 +2,17 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.3.0] - 2026-11-05
+
+### Added
+- Claude Code plugin and marketplace manifests (`.claude-plugin/`): `/plugin marketplace add aymardkouakou/claude-skills` then `/plugin install traceable-dev@aymardkouakou-skills` (validated with `claude plugin validate`).
+- Apache-2.0 `LICENSE` and attribution `NOTICE`; SPDX and copyright headers in scripts.
+- README rewritten for discoverability; repository description and topics.
+- Tests guarding distribution: no hard-coded install path, script references resolve, manifests consistent with the changelog.
+
+### Changed
+- Skills reference their scripts with `${CLAUDE_SKILL_DIR}` (and `${CLAUDE_SKILL_DIR}/../<skill>/` for siblings) instead of `~/.claude/skills/<skill>/`, so they work both symlinked and as a plugin.
+
 ## [0.2.0] - 2026-11-05
 
 ### Added

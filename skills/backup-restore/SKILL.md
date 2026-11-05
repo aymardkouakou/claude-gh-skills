@@ -30,4 +30,4 @@ Read the project's procedure first (CLAUDE.md, `docs/`, `procedures/`, `backup-*
 No off-site copy, no recorded restore test, single host, scripts cited by a procedure but missing from the repository, disk nearly full (logs not rotated).
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log backup-restore ok|partial|failed [--note …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log backup-restore ok|partial|failed [--note …]`.

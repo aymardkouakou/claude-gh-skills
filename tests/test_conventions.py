@@ -61,5 +61,33 @@ class Conventions(unittest.TestCase):
             self.assertIn("skill-learning/learn.py log", (d / "SKILL.md").read_text(encoding="utf-8"), d.name)
 
 
+class Distribution(unittest.TestCase):
+    """Skills must work both symlinked into ~/.claude/skills and installed as a plugin."""
+
+    def test_no_hardcoded_install_path_in_skill_files(self):
+        for d in SKILLS:
+            text = (d / "SKILL.md").read_text(encoding="utf-8")
+            self.assertNotIn("~/.claude/skills", text, f"{d.name}: use ${{CLAUDE_SKILL_DIR}} instead")
+
+    def test_script_references_resolve(self):
+        for d in SKILLS:
+            text = (d / "SKILL.md").read_text(encoding="utf-8")
+            for m in re.finditer(r"\$\{CLAUDE_SKILL_DIR\}/((?:\.\./[a-z-]+/)?[\w./-]+)", text):
+                target = (d / m.group(1)).resolve()
+                self.assertTrue(target.exists(), f"{d.name}: {m.group(0)} does not exist")
+
+    def test_plugin_manifests_are_consistent(self):
+        import json
+        plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())
+        market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+        entry = market["plugins"][0]
+        self.assertEqual((entry["name"], entry["version"]), (plugin["name"], plugin["version"]))
+        self.assertFalse(plugin["name"].startswith(("claude", "anthropic")), "reserved plugin name prefix")
+        latest = re.search(r"^## \[(\d+\.\d+\.\d+)\]", (ROOT / "CHANGELOG.md").read_text(), re.M).group(1)
+        self.assertEqual(plugin["version"], latest, "plugin.json version must match the latest CHANGELOG release")
+        self.assertEqual(plugin["license"], "Apache-2.0")
+        self.assertTrue((ROOT / "NOTICE").exists() and (ROOT / "LICENSE").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -24,6 +24,6 @@ Two layers: the **body** (living summary, always up to date) and the **comments*
 - `journal.sh` calls `text_guard.py`; never bypass its refusal.
 
 ```bash
-~/.claude/skills/issue-lifecycle/journal.sh <issue#> <type> <file> [owner/repo]
+journal.sh <issue#> <type> <file> [owner/repo]
 # without the 4th argument: the active repository (repo-context)
 ```

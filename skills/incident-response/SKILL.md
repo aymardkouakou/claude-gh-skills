@@ -21,7 +21,7 @@ Containment actions (disable a route, block a user, revoke sessions, stop a serv
 - No personal data or secret in drafts and registers: technical identifiers only.
 - A leaked secret means immediate rotation (`secrets-hygiene`), not only deletion.
 - Report gaps (emergency contacts "to be defined", no notification template) instead of filling them in.
-- Resolve the repository with `~/.claude/skills/repo-context/ctx.py repo` before opening tracking issues.
+- Resolve the repository with `${CLAUDE_SKILL_DIR}/../repo-context/ctx.py repo` before opening tracking issues.
 
 ## End of task
-Log the run: `~/.claude/skills/skill-learning/learn.py log incident-response ok|partial|failed [--note …]`.
+Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log incident-response ok|partial|failed [--note …]`.

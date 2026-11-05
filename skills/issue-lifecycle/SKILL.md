@@ -9,12 +9,12 @@ The issue is the memory of the error: someone reading it a year later must under
 
 ## Context first
 ```bash
-REPO=$(~/.claude/skills/repo-context/ctx.py repo)   # then pass --repo "$REPO" to every gh command
+REPO=$(${CLAUDE_SKILL_DIR}/../repo-context/ctx.py repo)   # then pass --repo "$REPO" to every gh command
 ```
 Read `kind` from `ctx.py resolve` (personal/organization, public/private/internal, fork, archived) and apply its `rules`; `writable: false` means stop. If `ctx.py resolve` reports `source` other than `gh`, or `authenticated: false`, ask the user before writing anything. Reuse remembered facts (label scheme, workflow) from `notes`.
 
 ## Language of what you publish
-Issue titles, bodies, journal comments and summaries are written in `$(~/.claude/skills/repo-context/ctx.py lang)` (exit code 3 = not chosen yet: ask the user once, then `ctx.py lang set CODE`). Translate the English template headings; keep error messages, commands and paths verbatim. `journal.sh` localises the entry label itself (`labels.json`).
+Issue titles, bodies, journal comments and summaries are written in `$(${CLAUDE_SKILL_DIR}/../repo-context/ctx.py lang)` (exit code 3 = not chosen yet: ask the user once, then `ctx.py lang set CODE`). Translate the English template headings; keep error messages, commands and paths verbatim. `journal.sh` localises the entry label itself (`labels.json`).
 
 ## When to open
 - **Yes**: more than one attempt to understand or fix; touches CI/deployment, backups, security, auth, payments; may recur; cause unclear.
@@ -29,21 +29,21 @@ Issue titles, bodies, journal comments and summaries are written in `$(~/.claude
 
 ## 1. Record
 - **Issue repository = repository of the faulty component.** Cause spread over several repositories: one issue per repository plus a short tracking issue that lists them. Unknown cause: open where the error is observed, then `gh issue transfer`.
-- Check that labels exist before using them: `~/.claude/skills/repo-context/ctx.py labels`.
+- Check that labels exist before using them: `${CLAUDE_SKILL_DIR}/../repo-context/ctx.py labels`.
 ```bash
 gh issue create --repo "$REPO" --title "<component>: <observable symptom>" \
   --label "type:bug" --label "priority:<high|medium|low>" --body-file <file>
 ```
 **Immediately after creation, the issue joins the Project and an epic (mandatory, never skipped):**
 ```bash
-~/.claude/skills/issue-lifecycle/project.py attach <n> --epic <epic#> --repo "$REPO"   # prints the Project used and its source
+${CLAUDE_SKILL_DIR}/project.py attach <n> --epic <epic#> --repo "$REPO"   # prints the Project used and its source
 ```
 Issues are driven by the repository's GitHub Project (one per repository, found automatically, always stated to the user). The epic is a parent issue labelled `epic`; members are native sub-issues. No epic fits: propose creating one or ask which to use; never leave the issue silently orphaned. Exit 3 = Project or epic undetermined (ask the user), 4 = token lacks the `project` scope (tell the user to run `gh auth refresh -s project`; never run it yourself). Catch up existing issues: `project.py orphans`, then `project.py backfill [--epic N] --apply` (dry-run by default).
 
 Title = the symptom, not the hypothesis. Priority `high` if login, payments, backups, security or production are affected. Body template: `references/issue-template.md`.
 
 ## 2. Resolution journal (mandatory, in real time)
-One entry per state change: `~/.claude/skills/issue-lifecycle/journal.sh <issue#> <type> <file> [owner/repo]` (UTC, refused automatically if the text looks like a secret; repository defaults to the active one). Types and rules: `references/journal.md`. Never bypass a refusal: redact.
+One entry per state change: `${CLAUDE_SKILL_DIR}/journal.sh <issue#> <type> <file> [owner/repo]` (UTC, refused automatically if the text looks like a secret; repository defaults to the active one). Types and rules: `references/journal.md`. Never bypass a refusal: redact.
 
 ## 3. Investigate
 1. Observe or reproduce without guessing; for wide code searches use the `explorer` agent.
@@ -77,4 +77,4 @@ gh issue close <n> --repo "$REPO" --reason completed      # "not planned" + just
 To fit the issue into an auditable chain (requirement → issue → PR → review → change → closure), also apply `dev-traceability` whenever a fix goes to production.
 
 ## End of task
-One line per issue: number and link, state, Project and epic, cause in one sentence. No open issue without a named next action. Then log the run: `~/.claude/skills/skill-learning/learn.py log issue-lifecycle ok|partial|failed [--note …]`.
+One line per issue: number and link, state, Project and epic, cause in one sentence. No open issue without a named next action. Then log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log issue-lifecycle ok|partial|failed [--note …]`.
