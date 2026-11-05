@@ -2,7 +2,7 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
-## [Unreleased]
+## [0.2.0] - 2026-11-05
 
 ### Added
 - `issue-lifecycle/project.py`: every issue is driven by the repository's GitHub Project (found automatically, always announced, remembered as note `project`) and attached to an epic through native sub-issues. Commands `resolve`, `attach`, `orphans`, `backfill` (dry-run by default). Detects a token without the `project` scope. Unit tests cover 100% of `project.py` and `repo-context/ctx.py`.
