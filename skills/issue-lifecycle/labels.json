@@ -1,0 +1,25 @@
+{
+  "_comment": "Localised journal entry labels for GitHub output. Add a language by adding a key; unknown languages fall back to English.",
+  "fr": {
+    "Observation": "Observation",
+    "Hypothesis": "Hypothèse",
+    "Test": "Test",
+    "Result": "Résultat",
+    "Decision": "Décision",
+    "Action": "Action",
+    "Interaction": "Interaction",
+    "Method error": "Erreur de méthode",
+    "Retrospective": "Rétrospective"
+  },
+  "es": {
+    "Observation": "Observación",
+    "Hypothesis": "Hipótesis",
+    "Test": "Prueba",
+    "Result": "Resultado",
+    "Decision": "Decisión",
+    "Action": "Acción",
+    "Interaction": "Interacción",
+    "Method error": "Error de método",
+    "Retrospective": "Retrospectiva"
+  }
+}
