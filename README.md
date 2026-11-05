@@ -2,12 +2,13 @@
 
 **Claude Code skills for traceable, GitHub-driven development: every issue in a Project and under an epic, every change linked from requirement to deployment, plus security audit, secrets hygiene and incident response.**
 
-[![release](https://img.shields.io/github/v/release/aymardkouakou/claude-gh-skills)](https://github.com/aymardkouakou/claude-gh-skills/releases)
+[![release](https://img.shields.io/github/v/release/aymardkouakou/claude-gh-skills?display_name=tag&sort=semver&cacheSeconds=600)](https://github.com/aymardkouakou/claude-gh-skills/releases)
 ![skills](https://img.shields.io/badge/skills-7-blue)
+[![tests](https://github.com/aymardkouakou/claude-gh-skills/actions/workflows/test.yml/badge.svg)](https://github.com/aymardkouakou/claude-gh-skills/actions/workflows/test.yml)
 [![license](https://img.shields.io/github/license/aymardkouakou/claude-gh-skills)](LICENSE)
 ![python](https://img.shields.io/badge/python-%E2%89%A53.9%20stdlib%20only-informational)
 
-Seven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (100 % statement coverage of the Python helpers) and installed globally by symlink.
+Seven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (114 tests, 100 % statement coverage of the Python helpers, Python 3.9 to 3.12) and installed globally by symlink.
 
 ## Why use them
 
@@ -51,7 +52,7 @@ Install **all** skills: they call each other through sibling directories (`${CLA
 ```
 Skills are then namespaced (`/traceable-dev:issue-lifecycle`). The manifests pass `claude plugin validate`; the install itself has not been exercised end to end.
 
-Update with `git pull && ./install.sh`; remove with `./install.sh uninstall`.
+Update with `git pull && ./install.sh` (symlink install, removed skills are pruned) or `/plugin update` (plugin); remove with `./install.sh uninstall`. What changed in each version: [releases](https://github.com/aymardkouakou/claude-gh-skills/releases) and [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Try it
 
@@ -65,6 +66,7 @@ Update with `git pull && ./install.sh`; remove with `./install.sh uninstall`.
 ~/.claude/skills/issue-lifecycle/project.py resolve     # which Project drives this repository (asks you to confirm a candidate)
 ~/.claude/skills/issue-lifecycle/project.py use OWNER/N  # record your choice
 ~/.claude/skills/issue-lifecycle/project.py create       # new Project, linked, same visibility as the repo
+~/.claude/skills/issue-lifecycle/project.py visibility   # align the Project visibility with the repo (--apply to fix)
 ~/.claude/skills/issue-lifecycle/project.py orphans     # open issues outside the Project or without an epic
 ~/.claude/skills/issue-lifecycle/project.py backfill --epic 12 --apply
 ```
@@ -72,7 +74,7 @@ Update with `git pull && ./install.sh`; remove with `./install.sh uninstall`.
 ## How it works
 
 - **Repository awareness.** `repo-context` runs `gh repo view`, falls back to the git remote, then to the last remembered repository, and keeps a small secret-free record per repository in `~/.claude/skill-state/`. Skills pass `--repo` explicitly.
-- **Language.** Skill files are English. The language of what they publish on GitHub is chosen per repository: `ctx.py lang set fr` (`--global`, `--commit` for commit messages). Unset means the skill asks once.
+- **Language.** Skill files are English. The language of what they publish on GitHub is chosen per repository: `ctx.py lang set fr` (`--global`, `--commit` for commit messages). Unset means the skill **stops and asks you to confirm it**: it never defaults or guesses, and `journal.sh` refuses to publish until it is set.
 - **Learning.** Each skill ends with `learn.py log <skill> ok|partial|failed`; improvements go on `improve/…` branches and wait for review. Nothing is pushed or merged automatically.
 
 ## Develop and contribute
