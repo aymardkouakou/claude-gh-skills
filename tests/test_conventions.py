@@ -46,7 +46,7 @@ class Conventions(unittest.TestCase):
                 self.assertIsNone(re.search(r"ghp_[A-Za-z0-9]{20}|AKIA[0-9A-Z]{12}|-----BEGIN [A-Z ]*PRIVATE", t), f.name)
 
     def test_manual_skills_are_the_risky_ones(self):
-        for name in ("incident-response", "secrets-hygiene", "backup-restore"):
+        for name in ("incident-response", "secrets-hygiene"):
             fm, _ = split((ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8"))
             self.assertIn("disable-model-invocation: true", fm, name)
 

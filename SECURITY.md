@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 Please report privately through GitHub: **Security → Report a vulnerability** on this repository
-(<https://github.com/aymardkouakou/claude-skills/security/advisories/new>). Do not open a public issue for a vulnerability.
+(<https://github.com/aymardkouakou/claude-gh-skills/security/advisories/new>). Do not open a public issue for a vulnerability.
 You will get an acknowledgement as soon as possible; there is no formal SLA for this personal project.
 
 ## Scope

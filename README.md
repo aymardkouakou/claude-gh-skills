@@ -1,13 +1,13 @@
-# claude-skills
+# claude-gh-skills
 
-**Claude Code skills for traceable, GitHub-driven development: every issue in a Project and under an epic, every change linked from requirement to deployment, plus payment-platform and security checks.**
+**Claude Code skills for traceable, GitHub-driven development: every issue in a Project and under an epic, every change linked from requirement to deployment, plus security audit, secrets hygiene and incident response.**
 
-[![release](https://img.shields.io/github/v/release/aymardkouakou/claude-skills)](https://github.com/aymardkouakou/claude-skills/releases)
-![skills](https://img.shields.io/badge/skills-11-blue)
-[![license](https://img.shields.io/github/license/aymardkouakou/claude-skills)](LICENSE)
+[![release](https://img.shields.io/github/v/release/aymardkouakou/claude-gh-skills)](https://github.com/aymardkouakou/claude-gh-skills/releases)
+![skills](https://img.shields.io/badge/skills-7-blue)
+[![license](https://img.shields.io/github/license/aymardkouakou/claude-gh-skills)](LICENSE)
 ![python](https://img.shields.io/badge/python-%E2%89%A53.9%20stdlib%20only-informational)
 
-Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (100 % statement coverage of the Python helpers) and installed globally by symlink.
+Seven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (100 % statement coverage of the Python helpers) and installed globally by symlink.
 
 ## Why use them
 
@@ -28,18 +28,14 @@ Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [C
 | [`security-audit`](skills/security-audit/SKILL.md) | audit an application before a release (read-only) | "audit sécurité", "avant la prod" |
 | [`secrets-hygiene`](skills/secrets-hygiene/SKILL.md) | audit and rotate secrets without reading their values | "rotation des secrets" |
 | [`incident-response`](skills/incident-response/SKILL.md) | handle an incident: qualification, containment, evidence, notifications | "incident", "panne en production" |
-| [`backup-restore`](skills/backup-restore/SKILL.md) | back up, verify and restore data; RPO/RTO | "restaure", "test de restauration" |
-| [`payment-reconciliation`](skills/payment-reconciliation/SKILL.md) | diagnose a stuck or mismatched mobile-money transaction | "transaction à vérifier", "écart" |
-| [`amounts-check`](skills/amounts-check/SKILL.md) | compute and verify XOF integer amounts, fees and rounding | "vérifie ce calcul" |
-| [`docker-cleanup`](skills/docker-cleanup/SKILL.md) | clean images and build cache after a task, never volumes | "nettoie docker" |
 
-`incident-response`, `secrets-hygiene` and `backup-restore` change shared systems and are manual-invocation only.
+`incident-response` and `secrets-hygiene` change shared systems and are manual-invocation only.
 
 ## Quick start
 
 ```bash
-git clone https://github.com/aymardkouakou/claude-skills.git
-cd claude-skills
+git clone https://github.com/aymardkouakou/claude-gh-skills.git
+cd claude-gh-skills
 ./install.sh            # symlinks every skills/<name> into ~/.claude/skills
 ./install.sh doctor     # checks git, python3, gh, links, SKILL.md names and tests
 ```
@@ -50,7 +46,7 @@ Install **all** skills: they call each other through sibling directories (`${CLA
 
 ### As a Claude Code plugin
 ```text
-/plugin marketplace add aymardkouakou/claude-skills
+/plugin marketplace add aymardkouakou/claude-gh-skills
 /plugin install traceable-dev@aymardkouakou-skills
 ```
 Skills are then namespaced (`/traceable-dev:issue-lifecycle`). The manifests pass `claude plugin validate`; the install itself has not been exercised end to end.
@@ -93,4 +89,6 @@ Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENT
 
 ## Scope and limits
 
-These skills encode one team's practices, written for Claude Code. The compliance mapping helps prepare evidence; it certifies nothing. Payment skills target XOF mobile-money platforms (1 EUR = 676 XOF).
+These skills encode one team's practices, written for Claude Code. The compliance mapping helps prepare evidence; it certifies nothing.
+
+The payment, Docker and backup skills of earlier releases (`amounts-check`, `payment-reconciliation`, `docker-cleanup`, `backup-restore`) were removed in 0.5.0 to keep this repository about GitHub operations; they remain in the git history and at tag `v0.4.0`.

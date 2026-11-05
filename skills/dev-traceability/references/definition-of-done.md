@@ -18,8 +18,8 @@
 - [ ] New dependencies reported and justified
 - [ ] Sensitive area (auth, money, data): security review done
 
-## Money (payment projects)
-- [ ] XOF amounts as integers, conversion 1 EUR = 676 XOF, explicit and tested rounding
+## Callbacks and money (if the project has them)
+- [ ] Amounts as integers in the smallest unit, explicit and tested rounding
 - [ ] Callbacks and webhooks idempotent, signature verified, logged without sensitive data
 
 ## Delivery

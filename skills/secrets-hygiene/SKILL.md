@@ -8,8 +8,9 @@ disable-model-invocation: true
 
 ## Absolute rules
 - **No value is read, displayed or copied.** Never open `*.env`, `secrets.env*`, services' `.env*`, nor display a Secret (`kubectl get secret -o yaml`, `docker inspect`, `docker compose config` expose them). Tool output must contain only names, states, lengths and dates.
+- GitHub: list names only (`gh secret list --repo "$REPO"`, `gh variable list`); never `gh secret` with a value on the command line (it lands in shell history) and never display one. Turn on secret scanning and push protection when the plan allows.
 - The user enters values in the vault (GitHub Environments, secret manager): tell them the secret **name** and where to enter it, never ask for the value. If a value is pasted into the conversation, do not reuse it and advise changing it.
-- Rotation on a shared system or production: prior confirmation, prior backup (`backup-restore`), change record (`dev-traceability`).
+- Rotation on a shared system or production: prior confirmation, prior backup of what the secret protects, change record (`dev-traceability`).
 - Exposed secret (commit, log, issue, screenshot): treat as compromised, rotate, then purge; deleting is not enough.
 
 ## Flow
@@ -22,7 +23,7 @@ disable-model-invocation: true
 7. **Scan before any PR**: look for hard-coded credentials in tracked files; file names containing `secret`, `password`, `credentials`, `*.key`, `*.pem` are often ignored by `.gitignore` (`git check-ignore -v`).
 
 ## Pitfalls
-- Rotating a session key or a webhook secret invalidates sessions or requires warning the third party (Wave, operators).
+- Rotating a session key or a webhook secret invalidates sessions or requires warning the third party (payment or API providers, partners).
 - Concurrent rotation lock: remove it only after checking that no rotation is running.
 - Production: refuse the deployment while a secret is default or weak.
 

@@ -10,6 +10,11 @@ cmd="${1:-install}"
 case "$cmd" in
   install)
     mkdir -p "$dest"
+    for l in "$dest"/*; do   # prune links to skills removed from this repository
+      if [ -L "$l" ] && [ ! -e "$l" ] && case "$(readlink "$l")" in "$repo"/skills/*|*/claude-skills/skills/*|*/claude-gh-skills/skills/*) true;; *) false;; esac; then
+        rm "$l"; echo "pruned    $(basename "$l") (skill no longer in this repository)"
+      fi
+    done
     for d in "$repo"/skills/*/; do
       n=$(basename "$d"); t="$dest/$n"
       if [ -L "$t" ]; then ln -sfn "${d%/}" "$t"; echo "relinked  $n"

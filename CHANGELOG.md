@@ -2,6 +2,18 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.5.0] - 2026-11-05
+
+### Removed
+- Skills unrelated to GitHub operations: `amounts-check`, `payment-reconciliation`, `docker-cleanup`, `backup-restore` (still available at tag `v0.4.0`). The plugin now ships seven skills.
+
+### Changed
+- Repository renamed `claude-skills` → `claude-gh-skills` (GitHub redirects the old URLs). Marketplace: `/plugin marketplace add aymardkouakou/claude-gh-skills`.
+- Full review of the remaining skills: dangling references to removed skills and to `wave-payments` fixed; payment-specific wording generalised (definition of done, incident response, secrets hygiene).
+- `security-audit` gains GitHub repository controls (branch protection and rulesets, secret scanning, Dependabot, CODEOWNERS, workflow permissions); `secrets-hygiene` covers GitHub secrets (names only).
+- `issue-lifecycle` resolves the user-confirmed Project and language before opening anything, and creates the `epic` label when missing.
+- `install.sh` prunes dangling links left by removed skills.
+
 ## [0.4.0] - 2026-11-05
 
 ### Added
