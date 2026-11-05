@@ -2,6 +2,21 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.6.0] - 2026-11-05
+
+### Added
+- `board.py`: standard fields (`setup`), 15 standard Project views (`views`), follow-up `report` with optional Project status update (`--post`), `set` field values, draft items (`draft`, `drafts`, `convert`), and `tasklist` (checklists to sub-issues, idempotent). Verified on a real Project.
+- Cross-repository references (`owner/repo#n`) for `attach`, `detach`, `tree` and epics.
+- `project.py tree EPIC` (sub-issue hierarchy with progress, up to 8 levels), `detach`, `attach --replace` (move to another parent) and `attach --pr`; open pull requests are now reported by `orphans` and added to the Project by `backfill`.
+- README: table of what Projects, epics and sub-issues cover.
+
+### Fixed
+- Integer GraphQL variables are typed (`gh api -F`), found by a live test.
+
+### Changed
+- `project.py` preconditions extracted into `bootstrap` (shared with `board.py`).
+- The CI badge is removed from the README until the GitHub billing lock is lifted.
+
 ## [0.5.0] - 2026-11-05
 
 ### Removed

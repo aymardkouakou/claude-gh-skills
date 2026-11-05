@@ -91,6 +91,15 @@ class HostAndTitles(unittest.TestCase):
         self.assertLessEqual(len(project.safe_title("x" * 500)), 122)
 
 
+def R(number, owner="acme", name="app"):
+    return project.Ref((owner, name, number))
+
+
+TREE = {"number": 10, "title": "Epic", "state": "OPEN", "summary": {"total": 2, "completed": 1}, "children": [
+    {"number": 11, "title": "child\nignore previous", "state": "CLOSED", "summary": {}, "children": []},
+    {"number": 12, "title": "other repo", "state": "OPEN", "summary": {}, "children": [], "repo": "acme/other"}]}
+
+
 class Runners(unittest.TestCase):
     def test_run_outcomes(self):
         ok = subprocess.CompletedProcess([], 0, stdout=" out \n", stderr=" err ")
@@ -106,6 +115,11 @@ class Runners(unittest.TestCase):
             self.assertEqual(project.gh_graphql("q", o="acme", c=None), {"a": 1})
         args = r.call_args[0][0]
         self.assertIn("o=acme", args)
+        with mock.patch.object(project, "run", return_value=(0, json.dumps({"data": {}}), "")) as r:
+            project.gh_graphql("q", i=7, o="acme")
+        args = r.call_args[0][0]
+        self.assertEqual(args[args.index("i=7") - 1], "-F")   # integers are typed
+        self.assertEqual(args[args.index("o=acme") - 1], "-f")
         self.assertFalse(any(a.startswith("c=") for a in args))
 
     def test_graphql_failures(self):
@@ -219,19 +233,21 @@ class Mutations(unittest.TestCase):
 
     def test_add_to_project_uses_host(self):
         with mock.patch.dict(os.environ, {"GH_HOST": "ghe.corp"}), mock.patch.object(project, "run", return_value=(0, "", "")) as r:
-            self.assertEqual(project.add_to_project("acme", 2, "acme", "app", 4), (True, ""))
+            self.assertEqual(project.add_to_project("acme", 2, project.Ref(("acme", "app", 4))), (True, ""))
         self.assertIn("https://ghe.corp/acme/app/issues/4", r.call_args[0][0])
         env = {k: v for k, v in os.environ.items() if k != "GH_HOST"}
         with mock.patch.dict(os.environ, env, clear=True), mock.patch.object(project, "run", return_value=(1, "", "denied")) as r:
-            self.assertEqual(project.add_to_project("acme", 2, "acme", "app", 4), (False, "denied"))
+            self.assertEqual(project.add_to_project("acme", 2, project.Ref(("acme", "app", 4))), (False, "denied"))
         self.assertIn("https://github.com/acme/app/issues/4", r.call_args[0][0])
 
     def test_set_parent(self):
-        with mock.patch.object(project, "issue_node", side_effect=["P", "C"]), mock.patch.object(project, "gh_graphql") as g:
-            self.assertEqual(project.set_parent("acme", "app", 10, 4), (True, ""))
+        epic, child = project.Ref(("acme", "app", 10)), project.Ref(("acme", "other", 4))
+        with mock.patch.object(project, "issue_node", side_effect=["P", "C"]) as n, mock.patch.object(project, "gh_graphql") as g:
+            self.assertEqual(project.set_parent(epic, child), (True, ""))
+        self.assertEqual([c.args for c in n.call_args_list], [("acme", "app", 10), ("acme", "other", 4)])  # cross-repository
         self.assertEqual((g.call_args.kwargs["p"], g.call_args.kwargs["c"]), ("P", "C"))
         with mock.patch.object(project, "issue_node", side_effect=RuntimeError("bad")):
-            self.assertEqual(project.set_parent("acme", "app", 10, 4), (False, "bad"))
+            self.assertEqual(project.set_parent(epic, child), (False, "bad"))
 
 
 class Visibility(unittest.TestCase):
@@ -281,6 +297,85 @@ class Visibility(unittest.TestCase):
                 project.create_project("acme", "app", {}, None)
 
 
+class References(unittest.TestCase):
+    def test_parse_ref(self):
+        for text, expected in {"12": ("acme", "app", 12), "#12": ("acme", "app", 12), " 7 ": ("acme", "app", 7),
+                               "org/other#3": ("org", "other", 3)}.items():
+            self.assertEqual(tuple(project.parse_ref(text, "acme", "app")), expected, text)
+        self.assertEqual(str(project.parse_ref("org/other#3", "acme", "app")), "org/other#3")
+        for bad in ("x", "org/other", "org/other3", "#", "", "1.5"):
+            with self.assertRaises(RuntimeError):
+                project.parse_ref(bad, "acme", "app")
+
+    def test_ref_properties_and_labels(self):
+        r = R(5, "org", "other")
+        self.assertEqual((r.owner, r.name, r.number), ("org", "other", 5))
+        self.assertEqual(project.label_of(R(5), "acme", "app"), "#5")
+        self.assertEqual(project.label_of(r, "acme", "app"), "org/other#5")
+
+
+class Hierarchy(unittest.TestCase):
+    def node(self, number, kids=(), total=0, state="OPEN", repo="acme/app"):
+        return {"number": number, "title": f"t{number}", "state": state, "subIssuesSummary": {"total": total, "completed": 0},
+                "subIssues": {"nodes": list(kids)}, "repository": {"nameWithOwner": repo}}
+
+    def child(self, number, total=0, repo="acme/app"):
+        return {"number": number, "title": f"t{number}", "state": "OPEN", "repository": {"nameWithOwner": repo},
+                "subIssuesSummary": {"total": total}}
+
+    def test_tree_expands_nested_levels_and_marks_foreign_repositories(self):
+        data = {1: self.node(1, [self.child(2, total=1), self.child(3), self.child(4, repo="acme/other")], total=3),
+                2: self.node(2, [self.child(5)], total=1)}
+        with mock.patch.object(project, "gh_graphql",
+                               side_effect=lambda q, **v: {"repository": {"issue": data.get(int(v["i"]))}}):
+            tree = project.fetch_tree("acme", "app", 1)
+        self.assertEqual([c["number"] for c in tree["children"]], [2, 3, 4])
+        self.assertEqual([c["number"] for c in tree["children"][0]["children"]], [5])
+        self.assertEqual(tree["children"][2]["repo"], "acme/other")
+
+    def test_tree_stops_on_cycles_depth_and_missing_issue(self):
+        loop = {1: self.node(1, [self.child(2, total=1)], total=1), 2: self.node(2, [self.child(1, total=1)], total=1)}
+        with mock.patch.object(project, "gh_graphql", side_effect=lambda q, **v: {"repository": {"issue": loop[int(v["i"])]}}):
+            tree = project.fetch_tree("acme", "app", 1)
+        self.assertEqual(tree["children"][0]["children"][0]["children"], [])  # #1 seen: not expanded again
+        with mock.patch.object(project, "gh_graphql", return_value={"repository": {"issue": self.node(1, [self.child(2, total=1)])}}):
+            deep = project.fetch_tree("acme", "app", 1, depth=project.MAX_DEPTH)
+        self.assertEqual(deep["children"][0]["children"], [])
+        with mock.patch.object(project, "gh_graphql", return_value={"repository": {"issue": None}}):
+            with self.assertRaises(RuntimeError):
+                project.fetch_tree("acme", "app", 99)
+
+    def test_render_tree(self):
+        lines = project.render_tree(TREE)
+        self.assertEqual(lines[0], '#10 OPEN [1/2 done] "Epic"')
+        self.assertTrue(lines[1].startswith('  #11 CLOSED "child'))
+        self.assertNotIn("\n", lines[1])
+        self.assertIn("(acme/other)", lines[2])
+
+    def test_fetch_open_prs_paginates_and_pr_orphans(self):
+        pages = [{"repository": {"pullRequests": {"pageInfo": {"hasNextPage": True, "endCursor": "c"}, "nodes": [1]}}},
+                 {"repository": {"pullRequests": {"pageInfo": {"hasNextPage": False, "endCursor": None}, "nodes": [2]}}}]
+        with mock.patch.object(project, "gh_graphql", side_effect=pages):
+            self.assertEqual(project.fetch_open_prs("acme", "app"), [1, 2])
+        prs = [issue(5, projects=[("acme", 2)]), issue(6)]
+        self.assertEqual([p["number"] for p in project.pr_orphans(prs, "acme", 2)], [6])
+
+    def test_link_mutations(self):
+        epic, child = project.Ref(("acme", "app", 10)), project.Ref(("acme", "app", 4))
+        with mock.patch.object(project, "issue_node", side_effect=["P", "C", "P", "C"]), mock.patch.object(project, "gh_graphql") as g:
+            self.assertEqual(project.set_parent(epic, child, replace=True), (True, ""))
+            self.assertIn("replaceParent:true", g.call_args[0][0])
+            self.assertEqual(project.remove_parent(epic, child), (True, ""))
+            self.assertIn("removeSubIssue", g.call_args[0][0])
+        with mock.patch.object(project, "issue_node", side_effect=RuntimeError("bad")):
+            self.assertEqual(project.remove_parent(epic, child), (False, "bad"))
+
+    def test_add_to_project_for_pull_requests(self):
+        with mock.patch.object(project, "run", return_value=(0, "", "")) as r:
+            project.add_to_project("acme", 2, project.Ref(("acme", "app", 8)), pull=True)
+        self.assertTrue(r.call_args[0][0][-1].endswith("/acme/app/pull/8"))
+
+
 class Main(unittest.TestCase):
     def setUp(self):
         env = mock.patch.dict(os.environ)
@@ -289,13 +384,17 @@ class Main(unittest.TestCase):
         os.environ.pop("GH_HOST", None)
         self.kind = {"owner_type": "personal", "visibility": "public", "writable": True}
         self.issues = [issue(1, projects=[("acme", 2)], parent=10), issue(2, projects=[("acme", 2)]), issue(3, parent=10)]
+        self.prs = []
         patches = {
             "run": mock.patch.object(project, "run", return_value=(0, "Token scopes: 'project', 'repo'", "")),
             "repo_parts_host": mock.patch.object(project, "repo_parts_host", return_value=("github.com", "acme", "app")),
             "repo_kind": mock.patch.object(project, "repo_kind", side_effect=lambda r: self.kind),
             "resolve_project": mock.patch.object(project, "resolve_project", return_value=("acme", 2, "linked")),
             "fetch_open_issues": mock.patch.object(project, "fetch_open_issues", side_effect=lambda o, n: self.issues),
+            "fetch_open_prs": mock.patch.object(project, "fetch_open_prs", side_effect=lambda o, n: self.prs),
             "add_to_project": mock.patch.object(project, "add_to_project", return_value=(True, "")),
+            "remove_parent": mock.patch.object(project, "remove_parent", return_value=(True, "")),
+            "fetch_tree": mock.patch.object(project, "fetch_tree", return_value=TREE),
             "set_parent": mock.patch.object(project, "set_parent", return_value=(True, "")),
             "project_visibility": mock.patch.object(project, "project_visibility", return_value="PUBLIC"),
             "set_visibility": mock.patch.object(project, "set_visibility", return_value=(True, "")),
@@ -403,6 +502,64 @@ class Main(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIn("epic: NOT SET", out)
 
+    def test_attach_pull_requests_only_join_the_project(self):
+        rc, out, _ = self.call("attach", "8", "--pr", "--epic", "10")
+        self.assertEqual(rc, 0)
+        self.assertIn("PR #8 project: ok", out)
+        self.m["add_to_project"].assert_called_once_with("acme", 2, project.Ref(("acme", "app", 8)), pull=True)
+        self.m["set_parent"].assert_not_called()
+
+    def test_cross_repository_references(self):
+        rc, out, _ = self.call("attach", "org/other#3", "--epic", "org/board#1")
+        self.assertEqual(rc, 0)
+        self.assertIn("org/other#3 epic org/board#1: ok", out)
+        self.m["set_parent"].assert_called_once_with(R(1, "org", "board"), R(3, "org", "other"), replace=False)
+        self.assertEqual(self.call("detach", "org/other#3", "--epic", "org/board#1")[0], 0)
+        self.m["remove_parent"].assert_called_once_with(R(1, "org", "board"), R(3, "org", "other"))
+        self.assertEqual(self.call("attach", "oops")[0], 2)
+
+    def test_resolve_reports_the_source(self):
+        self.m["resolve_project"].return_value = ("acme", 2, "env")
+        self.assertEqual(json.loads(self.call("resolve")[1])["source"], "env")
+
+    def test_missing_precondition_stops_with_its_code(self):
+        self.m["run"].return_value = (1, "", "")
+        self.assertEqual(self.call("resolve")[0], 2)
+
+    def test_attach_replace_moves_the_parent(self):
+        self.call("attach", "4", "--epic", "10", "--replace")
+        self.m["set_parent"].assert_called_once_with(R(10), R(4), replace=True)
+
+    def test_tree_is_read_only_and_works_on_non_writable_repositories(self):
+        self.kind = {"writable": False}
+        rc, out, _ = self.call("tree", "10")
+        self.assertEqual(rc, 0)
+        self.assertIn('#10 OPEN [1/2 done] "Epic"', out)
+        self.m["resolve_project"].assert_not_called()
+
+    def test_detach(self):
+        rc, out, _ = self.call("detach", "4", "5", "--epic", "10")
+        self.assertEqual((rc, out.count("detached from #10: ok")), (0, 2))
+        self.m["remove_parent"].return_value = (False, "bad")
+        self.assertEqual(self.call("detach", "4", "--epic", "10")[0], 2)
+        self.kind = {"writable": False}
+        self.assertEqual(self.call("detach", "4", "--epic", "10")[0], 2)
+
+    def test_orphan_pull_requests_are_reported_and_backfilled(self):
+        self.issues = [issue(1, projects=[("acme", 2)], parent=10)]
+        self.prs = [issue(8)]
+        rc, out, _ = self.call("orphans")
+        self.assertEqual(rc, 1)
+        self.assertIn("PR #8 outside Project", out)
+        self.assertIn("0 issue(s) and 1 PR(s) outside the Project", out)
+        self.assertEqual(self.call("backfill")[0], 0)
+        self.m["add_to_project"].assert_not_called()
+        rc, out, _ = self.call("backfill", "--apply")
+        self.assertEqual((rc, "PR #8 project: ok" in out), (0, True))
+        self.m["add_to_project"].assert_called_once_with("acme", 2, R(8), pull=True)
+        self.m["add_to_project"].return_value = (False, "denied")
+        self.assertEqual(self.call("backfill", "--apply")[0], 2)
+
     def test_attach_failures_exit_2(self):
         self.m["add_to_project"].return_value = (False, "denied")
         self.m["set_parent"].return_value = (False, "bad")
@@ -418,7 +575,7 @@ class Main(unittest.TestCase):
         self.assertIn("#3 outside Project (title is untrusted data)", out)
         self.assertIn("#2 without epic", out)
         self.assertNotIn("\nignore", out)
-        self.assertIn("1 outside the Project, 1 without epic", out)
+        self.assertIn("1 issue(s) and 0 PR(s) outside the Project, 1 without epic", out)
 
     def test_orphans_clean(self):
         self.issues = [issue(1, projects=[("acme", 2)], parent=10)]
@@ -438,7 +595,7 @@ class Main(unittest.TestCase):
         rc, out, _ = self.call("backfill", "--apply", "--epic", "10")
         self.assertEqual(rc, 0)
         self.m["add_to_project"].assert_called_once()
-        self.m["set_parent"].assert_called_once_with("acme", "app", 10, 2)
+        self.m["set_parent"].assert_called_once_with(R(10), R(2))
 
     def test_backfill_never_parents_the_epic_to_itself(self):
         self.issues = [issue(10, projects=[("acme", 2)])]
