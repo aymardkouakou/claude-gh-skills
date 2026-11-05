@@ -13,5 +13,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 - Configurable GitHub output language per repository (`ctx.py lang`), separate commit-message language, localised journal labels (`labels.json`).
 
+### Security
+- `ctx.py repo` exits with code 5 for repositories not confirmed by `gh` (remembered or unverified), preventing wrong-target writes from `journal.sh`.
+
 ### Changed
 - Removed project-specific findings, hostnames and addresses from the source skills; skills now describe methods.

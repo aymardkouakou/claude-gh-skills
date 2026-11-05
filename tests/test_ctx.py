@@ -122,3 +122,29 @@ class Language(unittest.TestCase):
         self.assertEqual(ctx.main(["lang"]), 0)
         self.assertEqual(ctx.load(ctx.REPOS / (key + ".json"))["settings"]["language"], "fr")
         self.assertEqual(ctx.main(["lang", "set", "xx1"]), 2)
+
+
+class UnverifiedRepoIsRefused(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        base = Path(self.tmp.name)
+        ctx.STATE, ctx.REPOS, ctx.LAST, ctx.CONFIG = base, base / "repos", base / "last.json", base / "config.json"
+        os.environ.pop("GH_REPO", None)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_repo_command_refuses_remembered(self):
+        ctx.save(ctx.REPOS / "github.com__a__b.json", {"host": "github.com", "owner": "a", "repo": "b"})
+        ctx.save(ctx.LAST, {"key": "github.com__a__b"})
+        with mock.patch.object(ctx, "run", lambda *a, **k: (1, "", "fail")):
+            self.assertEqual(ctx.main(["repo", "--no-touch"]), 5)
+            self.assertEqual(ctx.main(["repo", "--no-touch", "--allow-unverified"]), 0)
+
+    def test_repo_command_accepts_gh_confirmed(self):
+        def fake(args, cwd=None, timeout=20):
+            if args[:3] == ["gh", "repo", "view"]:
+                return 0, json.dumps({"nameWithOwner": "a/b", "url": "https://github.com/a/b"}), ""
+            return 0, "", ""
+        with mock.patch.object(ctx, "run", fake):
+            self.assertEqual(ctx.main(["repo", "--no-touch"]), 0)

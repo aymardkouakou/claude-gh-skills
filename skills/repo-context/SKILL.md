@@ -25,6 +25,7 @@ Every skill that touches GitHub resolves the repository **first**, through this 
 4. The last remembered repository, flagged `source: remembered` with a warning.
 
 ## Rules
+- `ctx.py repo` **refuses (exit 5)** when the repository is only `remembered` or `explicit-unverified`, so scripts such as `journal.sh` can never write to a repository that `gh` did not confirm. Use `--allow-unverified` for read-only purposes only.
 - Read `source` and `authenticated`. If `source` is `remembered` or `explicit-unverified`, or `authenticated` is false, **ask the user** before any write (issue, comment, PR, merge, label). Never run `gh auth login`, `gh auth switch` or `gh auth refresh` without being asked.
 - Always pass `--repo "$(~/.claude/skills/repo-context/ctx.py repo)"` to `gh` commands that accept it. For several repositories (monorepo + submodules), resolve each one separately.
 - Check `permission` before writing (`READ` cannot open PRs or push).

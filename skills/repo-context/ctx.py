@@ -5,7 +5,7 @@ Standard library only. Never prints or stores tokens, passwords or any secret.
 
 Usage:
   ctx.py resolve [--repo OWNER/REPO] [--no-touch]   JSON about the active repository
-  ctx.py repo    [--repo OWNER/REPO]                plain "[HOST/]OWNER/REPO", ready for `gh --repo`
+  ctx.py repo    [--repo OWNER/REPO]                plain "[HOST/]OWNER/REPO" for `gh --repo`; exit 5 if gh did not confirm it
   ctx.py labels  [--refresh]                        labels of the active repository (cached)
   ctx.py note KEY VALUE                             remember a learned fact about the active repository
   ctx.py lang [--commit]                            language for GitHub output (issues, PRs, comments); exit 3 if unset
@@ -154,6 +154,7 @@ def resolve(explicit=None, cwd=None, touch=True):
     return out
 
 
+UNVERIFIED = ("remembered", "explicit-unverified")
 LANG_RE = re.compile(r"^[a-z]{2,3}(-[A-Z]{2})?$")
 CONFIG = STATE / "config.json"
 
@@ -182,6 +183,9 @@ def main(argv=None):
         s = sub.add_parser(name)
         s.add_argument("--repo")
         s.add_argument("--no-touch", action="store_true")
+        if name == "repo":
+            s.add_argument("--allow-unverified", action="store_true",
+                           help="print the repository even if gh did not confirm it (never use before a write)")
     s = sub.add_parser("labels")
     s.add_argument("--refresh", action="store_true")
     s = sub.add_parser("note")
@@ -204,6 +208,10 @@ def main(argv=None):
             print(json.dumps({"error": "No repository found: not in a git repo with a GitHub remote and nothing remembered. "
                                        "Run inside the project or pass --repo OWNER/REPO."}), file=sys.stderr)
             return 2
+        if a.cmd == "repo" and r["source"] in UNVERIFIED and not a.allow_unverified:
+            print(f'REFUSED: repository "{r["full"]}" is only {r["source"]} (not confirmed by gh in this directory). '
+                  "Confirm with the user and pass --repo OWNER/REPO, or use --allow-unverified for read-only use.", file=sys.stderr)
+            return 5
         print(r["full"] if a.cmd == "repo" else json.dumps(r, indent=2, ensure_ascii=False))
         return 0
     key, rec = active_record()
