@@ -5,7 +5,7 @@
 [![release](https://img.shields.io/github/v/release/aymardkouakou/claude-gh-skills?display_name=tag&sort=semver&cacheSeconds=600)](https://github.com/aymardkouakou/claude-gh-skills/releases)
 ![skills](https://img.shields.io/badge/skills-11-blue)
 [![license](https://img.shields.io/github/license/aymardkouakou/claude-gh-skills)](LICENSE)
-![python](https://img.shields.io/badge/python-%E2%89%A53.9%20stdlib%20only-informational)
+![python](<https://img.shields.io/badge/python-%E2%89%A53.9%20stdlib%20only-informational>)
 
 Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (100 % statement coverage of the Python helpers, Python 3.9 to 3.12) and installed globally by symlink.
 
@@ -21,19 +21,19 @@ Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [C
 
 ## Skills
 
-| Skill | Use it when you want to… | Also triggers on (French) |
-|---|---|---|
-| [`repo-context`](skills/repo-context/SKILL.md) | resolve and remember the active GitHub repository, its profile and the publishing language | "quel dépôt", "repo actif" |
-| [`issue-lifecycle`](skills/issue-lifecycle/SKILL.md) | record an error as an issue, keep a timestamped journal, fix, verify, close | "ouvre une issue", "bug récurrent" |
-| [`project-tracking`](skills/project-tracking/SKILL.md) | keep issues and PRs in the GitHub Project and under epics (sub-issues), repair orphans | "rattache à l'epic", "issue orpheline" |
-| [`project-board`](skills/project-board/SKILL.md) | build fields and 15 standard views, follow-up reports, status updates, drafts, task lists | "crée les vues", "rapport d'avancement" |
-| [`dev-traceability`](skills/dev-traceability/SKILL.md) | trace a change from requirement to merge, RTM, definition of done, audit evidence | "matrice de traçabilité", "prépare l'audit" |
-| [`change-management`](skills/change-management/SKILL.md) | record, approve, deploy and verify a change in a shared environment | "mise en prod", "registre des changements" |
-| [`repo-hardening`](skills/repo-hardening/SKILL.md) | audit branch protection, secret scanning, Dependabot, CODEOWNERS, Actions permissions | "protège la branche", "durcis le dépôt" |
-| [`security-audit`](skills/security-audit/SKILL.md) | audit an application before a release (read-only) | "audit sécurité", "avant la prod" |
-| [`secrets-hygiene`](skills/secrets-hygiene/SKILL.md) | audit and rotate secrets without reading their values | "rotation des secrets" |
-| [`incident-response`](skills/incident-response/SKILL.md) | handle an incident: qualification, containment, evidence, notifications | "incident", "panne en production" |
-| [`skill-learning`](skills/skill-learning/SKILL.md) | review how skills were used and improve them | "améliore les skills" |
+| Skill                                                     | Use it when you want to…                                                                  | Also triggers on (French)                      |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| [`repo-context`](skills/repo-context/SKILL.md)           | resolve and remember the active GitHub repository, its profile and the publishing language | "quel dépôt", "repo actif"                   |
+| [`issue-lifecycle`](skills/issue-lifecycle/SKILL.md)     | record an error as an issue, keep a timestamped journal, fix, verify, close                | "ouvre une issue", "bug récurrent"            |
+| [`project-tracking`](skills/project-tracking/SKILL.md)   | keep issues and PRs in the GitHub Project and under epics (sub-issues), repair orphans     | "rattache à l'epic", "issue orpheline"        |
+| [`project-board`](skills/project-board/SKILL.md)         | build fields and 15 standard views, follow-up reports, status updates, drafts, task lists  | "crée les vues", "rapport d'avancement"       |
+| [`dev-traceability`](skills/dev-traceability/SKILL.md)   | trace a change from requirement to merge, RTM, definition of done, audit evidence          | "matrice de traçabilité", "prépare l'audit" |
+| [`change-management`](skills/change-management/SKILL.md) | record, approve, deploy and verify a change in a shared environment                        | "mise en prod", "registre des changements"     |
+| [`repo-hardening`](skills/repo-hardening/SKILL.md)       | audit branch protection, secret scanning, Dependabot, CODEOWNERS, Actions permissions      | "protège la branche", "durcis le dépôt"     |
+| [`security-audit`](skills/security-audit/SKILL.md)       | audit an application before a release (read-only)                                          | "audit sécurité", "avant la prod"            |
+| [`secrets-hygiene`](skills/secrets-hygiene/SKILL.md)     | audit and rotate secrets without reading their values                                      | "rotation des secrets"                         |
+| [`incident-response`](skills/incident-response/SKILL.md) | handle an incident: qualification, containment, evidence, notifications                    | "incident", "panne en production"              |
+| [`skill-learning`](skills/skill-learning/SKILL.md)       | review how skills were used and improve them                                               | "améliore les skills"                         |
 
 `incident-response`, `secrets-hygiene` and `change-management` change shared systems and are manual-invocation only. Each skill has one responsibility and a short `SKILL.md`; long material lives in its `references/` folder.
 
@@ -51,16 +51,21 @@ Requirements: `git`, `python3` ≥ 3.9 (standard library only) and, for GitHub f
 Install **all** skills: they call each other through sibling directories (`${CLAUDE_SKILL_DIR}/../<name>/`), for example `issue-lifecycle` uses `repo-context`.
 
 ### As a Claude Code plugin
+
 ```text
 /plugin marketplace add aymardkouakou/claude-gh-skills
 /plugin install traceable-dev@aymardkouakou-skills
 ```
+
 `/plugin` is not available in every environment (for example the IDE extensions answer "/plugin isn't available in this environment"). The same steps work from a terminal with the CLI:
+
 ```bash
 claude plugin marketplace add aymardkouakou/claude-gh-skills
 claude plugin install traceable-dev@aymardkouakou-skills
 ```
+
 Use **either** the plugin **or** the symlink install (`./install.sh`), not both: the same skills would load twice, once namespaced.
+
 Skills are then namespaced (`/traceable-dev:issue-lifecycle`). The manifests pass `claude plugin validate`; the install itself has not been exercised end to end.
 
 Update with `git pull && ./install.sh` (symlink install, removed skills are pruned) or `/plugin update` (plugin); remove with `./install.sh uninstall`. What changed in each version: [releases](https://github.com/aymardkouakou/claude-gh-skills/releases) and [`CHANGELOG.md`](CHANGELOG.md).
@@ -99,34 +104,34 @@ Update with `git pull && ./install.sh` (symlink install, removed skills are prun
 ~/.claude/skills/project-board/board.py tasklist 12 --apply [--create]   # `- [ ] #n` checklists -> sub-issues (same repository; --allow-cross-repo for others)
 ```
 
-| View | Layout | Filter | Answers |
-|---|---|---|---|
-| Board | board | `is:open` | where is everything (columns by Status) |
-| Backlog | table | `is:open status:Todo` | what is next, by Priority |
-| Current iteration | board | `iteration:@current` | what are we doing now |
-| Roadmap | roadmap | `is:open` | when (Target date) |
-| Epics | table | `label:epic` | progress of each epic |
-| By epic | table | `is:open -label:epic` | work grouped by parent |
-| Without epic | table | `is:issue is:open no:parent-issue -label:epic` | orphans to attach |
-| My work | table | `assignee:@me is:open` | my queue |
-| Needs triage | table | `is:open no:priority` | what has no priority yet |
-| In review | table | `is:pr is:open` | pull requests waiting |
-| Blocked | table | `label:blocked is:open` | what is stuck |
-| Bugs / Security | table | `label:bug` / `label:security` | defects and risks |
-| Stale | table | `is:open updated:<@today-30d` | what was forgotten |
-| Done | table | `status:Done` | what shipped |
+| View              | Layout  | Filter                                           | Answers                                 |
+| ----------------- | ------- | ------------------------------------------------ | --------------------------------------- |
+| Board             | board   | `is:open`                                      | where is everything (columns by Status) |
+| Backlog           | table   | `is:open status:Todo`                          | what is next, by Priority               |
+| Current iteration | board   | `iteration:@current`                           | what are we doing now                   |
+| Roadmap           | roadmap | `is:open`                                      | when (Target date)                      |
+| Epics             | table   | `label:epic`                                   | progress of each epic                   |
+| By epic           | table   | `is:open -label:epic`                          | work grouped by parent                  |
+| Without epic      | table   | `is:issue is:open no:parent-issue -label:epic` | orphans to attach                       |
+| My work           | table   | `assignee:@me is:open`                         | my queue                                |
+| Needs triage      | table   | `is:open no:priority`                          | what has no priority yet                |
+| In review         | table   | `is:pr is:open`                                | pull requests waiting                   |
+| Blocked           | table   | `label:blocked is:open`                        | what is stuck                           |
+| Bugs / Security   | table   | `label:bug` / `label:security`               | defects and risks                       |
+| Stale             | table   | `is:open updated:<@today-30d`                  | what was forgotten                      |
+| Done              | table   | `status:Done`                                  | what shipped                            |
 
 GitHub's API creates a view with its name, layout and filter but **cannot set grouping or sorting, nor enable the built-in workflows**: `views` prints the one-click settings to apply by hand (for example group *By epic* by *Parent issue*) and the workflows to enable (item added → Todo, closed/merged → Done, auto-add, auto-archive).
 
 ## Projects, epics and sub-issues: what is covered
 
-| Covered | Limits |
-|---|---|
-| Project chosen by you, created linked and as visible as the repository | View grouping/sorting and built-in workflows are manual (GitHub API) |
-| Issues and open pull requests in the Project, orphans repaired in bulk | The `Status` field keeps GitHub's options (Todo, In Progress, Done); changing them would reset item values |
-| Epic → sub-issue links (one parent, move, remove), 8 levels, progress, cross-repository `owner/repo#n` | Cross-repository links are unit-tested only |
-| Custom fields, draft items, task lists converted to sub-issues, reports and status updates | `report` staleness uses the last update of the issue or PR |
-| Personal and organization accounts; public, private, fork and archived repositories | GitHub Enterprise Server and internal repositories: unit-tested only |
+| Covered                                                                                                   | Limits                                                                                                       |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Project chosen by you, created linked and as visible as the repository                                    | View grouping/sorting and built-in workflows are manual (GitHub API)                                         |
+| Issues and open pull requests in the Project, orphans repaired in bulk                                    | The `Status` field keeps GitHub's options (Todo, In Progress, Done); changing them would reset item values |
+| Epic → sub-issue links (one parent, move, remove), 8 levels, progress, cross-repository `owner/repo#n` | Cross-repository links are unit-tested only                                                                  |
+| Custom fields, draft items, task lists converted to sub-issues, reports and status updates                | `report` staleness uses the last update of the issue or PR                                                 |
+| Personal and organization accounts; public, private, fork and archived repositories                       | GitHub Enterprise Server and internal repositories: unit-tested only                                         |
 
 ## How it works
 

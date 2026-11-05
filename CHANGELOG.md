@@ -2,6 +2,12 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [0.7.2] - 2026-11-05
+
+### Changed
+- README: tables re-aligned by the editor's Markdown formatter; the terminal install instructions (`claude plugin …`) restored after a stale editor buffer had overwritten them.
+- `.gitignore`: editor Local History (`.history/`) is ignored.
+
 ## [0.7.1] - 2026-11-05
 
 ### Changed
