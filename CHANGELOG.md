@@ -4,6 +4,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-08
+
 ### Changed
 - **Licence**: Apache-2.0 replaced by the claude-gh-skills Source-Available License 1.0 for versions from v0.9.0: free use, no redistribution of the work or of modified versions, changes only through contributions to this repository, attribution kept. Versions up to v0.8.0 remain under Apache-2.0. SPDX headers now `LicenseRef-claude-gh-skills-1.0`, manifests `SEE LICENSE IN LICENSE`.
 - `security-audit`, `repo-hardening`, `secrets-hygiene`, `change-management`, `incident-response` and `skill-learning` gain a `Tracking` section: findings, records and approved proposals become issues attached to the Project and an epic (every gap, not only critical ones; never a secret value in issue text). Rule added to `CONVENTIONS.md`, enforced by a conventions test (196 tests).
