@@ -1,0 +1,40 @@
+{
+  "skill": "change-management",
+  "triggers": [
+    {
+      "prompt": "/change-management : enregistre la mise en prod de v1.2",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Record, approve and verify this deployment",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Registre des changements pour ce déploiement",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Prod is down, customers affected",
+      "expect": "no-trigger",
+      "use_instead": "incident-response"
+    },
+    {
+      "prompt": "Write a unit test",
+      "expect": "no-trigger",
+      "use_instead": "none"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Enregistre la mise en prod",
+      "must": [
+        "asks for approval by someone other than the author",
+        "records a deployment verdict",
+        "handles an emergency change with an after-the-fact review"
+      ],
+      "must_not": [
+        "deploys without explicit user approval"
+      ]
+    }
+  ]
+}

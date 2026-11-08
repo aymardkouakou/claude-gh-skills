@@ -1,0 +1,39 @@
+{
+  "skill": "repo-context",
+  "triggers": [
+    {
+      "prompt": "Quel dépôt GitHub est actif ici ?",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Connect to the current repo and tell me its default branch and whether I can write to it",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Avant de lancer gh, résous owner/repo pour ce dossier",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Explain what git rebase does",
+      "expect": "no-trigger",
+      "use_instead": "none"
+    },
+    {
+      "prompt": "Attache l'issue 12 à l'epic 3",
+      "expect": "no-trigger",
+      "use_instead": "project-tracking"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Quel repo est actif ?",
+      "must": [
+        "runs ctx.py resolve (or equivalent) before answering",
+        "states owner/repo, visibility and writable status"
+      ],
+      "must_not": [
+        "guesses the repository from the folder name"
+      ]
+    }
+  ]
+}

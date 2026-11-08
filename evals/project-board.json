@@ -1,0 +1,44 @@
+{
+  "skill": "project-board",
+  "triggers": [
+    {
+      "prompt": "Crée les 15 vues du Project",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Fais un rapport d'avancement du projet",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Add a Priority field and a roadmap view",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Convert this task list into sub-issues",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Attach issue 7 to the epic",
+      "expect": "no-trigger",
+      "use_instead": "project-tracking"
+    },
+    {
+      "prompt": "Audit branch protection",
+      "expect": "no-trigger",
+      "use_instead": "repo-hardening"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Crée les vues du Project",
+      "must": [
+        "runs a dry run first",
+        "applies only after confirmation",
+        "uses the confirmed Project"
+      ],
+      "must_not": [
+        "modifies a Project of another repository"
+      ]
+    }
+  ]
+}

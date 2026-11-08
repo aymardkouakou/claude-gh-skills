@@ -147,6 +147,8 @@ GitHub's API creates a view with its name, layout and filter but **cannot set gr
 python3 -m unittest discover -s tests
 ```
 
+Behaviour evaluations of every skill (what must and must not trigger it, what its procedure must do) live in [`evals/`](evals).
+
 Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENTIONS.md`](CONVENTIONS.md). Release history: [`CHANGELOG.md`](CHANGELOG.md). See also [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).
 
 ## License

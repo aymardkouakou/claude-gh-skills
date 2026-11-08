@@ -1,0 +1,40 @@
+{
+  "skill": "skill-learning",
+  "triggers": [
+    {
+      "prompt": "Améliore les skills d'après mes usages",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Review how the skills behaved this week",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Apprends de mes corrections",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Fix the bug in the payment module",
+      "expect": "no-trigger",
+      "use_instead": "none"
+    },
+    {
+      "prompt": "Create the Project views",
+      "expect": "no-trigger",
+      "use_instead": "project-board"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Améliore les skills",
+      "must": [
+        "reads the local history only",
+        "drafts proposals and asks for review",
+        "tracks approved proposals as issues"
+      ],
+      "must_not": [
+        "edits a SKILL.md without review"
+      ]
+    }
+  ]
+}

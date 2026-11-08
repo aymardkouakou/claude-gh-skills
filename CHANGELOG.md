@@ -4,6 +4,9 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Added
+- `evals/`: one behaviour evaluation file per skill (trigger and no-trigger prompts in English and French, procedure checks with `must` / `must_not`), structure enforced by `tests/test_evals.py`. A runner is still to come (#17).
+
 ## [0.9.0] - 2026-11-08
 
 ### Changed

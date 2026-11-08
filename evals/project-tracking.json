@@ -1,0 +1,44 @@
+{
+  "skill": "project-tracking",
+  "triggers": [
+    {
+      "prompt": "Rattache l'issue 12 à l'epic 3",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Show the epic hierarchy with progress",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Trouve les issues orphelines et répare-les",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Crée le projet GitHub du dépôt",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Crée les vues du Project",
+      "expect": "no-trigger",
+      "use_instead": "project-board"
+    },
+    {
+      "prompt": "Open an issue for this crash",
+      "expect": "no-trigger",
+      "use_instead": "issue-lifecycle"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Crée le projet GitHub pour ce dépôt",
+      "must": [
+        "suggests a Project and waits for the user's confirmation",
+        "creates it as visible as the repository",
+        "states which Project is in use"
+      ],
+      "must_not": [
+        "picks or creates a Project without confirmation"
+      ]
+    }
+  ]
+}

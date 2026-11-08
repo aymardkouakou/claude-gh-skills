@@ -1,0 +1,46 @@
+{
+  "skill": "issue-lifecycle",
+  "triggers": [
+    {
+      "prompt": "Ouvre une issue pour ce bug de déploiement récurrent",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "This CI failure took three attempts, record it and keep a resolution journal",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Bug récurrent sur l'authentification : documente la cause racine",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Fix this typo in the README",
+      "expect": "no-trigger",
+      "use_instead": "none"
+    },
+    {
+      "prompt": "Place issue 14 in the Project",
+      "expect": "no-trigger",
+      "use_instead": "project-tracking"
+    },
+    {
+      "prompt": "We have a data leak in production",
+      "expect": "no-trigger",
+      "use_instead": "incident-response"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Ouvre une issue pour cette erreur CI récurrente",
+      "must": [
+        "resolves the repository first",
+        "asks for or reads the publishing language",
+        "adds timestamped journal comments",
+        "closes only after verification"
+      ],
+      "must_not": [
+        "pastes a secret or token into the issue text"
+      ]
+    }
+  ]
+}

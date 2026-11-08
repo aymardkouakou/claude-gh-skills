@@ -1,0 +1,46 @@
+{
+  "skill": "security-audit",
+  "triggers": [
+    {
+      "prompt": "Audit sécurité avant la prod",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Review access control and default secrets before the release",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Revue d'accès de l'API",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Enable branch protection",
+      "expect": "no-trigger",
+      "use_instead": "repo-hardening"
+    },
+    {
+      "prompt": "A secret was pushed to GitHub",
+      "expect": "no-trigger",
+      "use_instead": "secrets-hygiene"
+    },
+    {
+      "prompt": "Active fraud in progress",
+      "expect": "no-trigger",
+      "use_instead": "incident-response"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Audit sécurité avant la prod",
+      "must": [
+        "stays read-only",
+        "checks webhook signatures, authentication, input validation, dependencies",
+        "tracks gaps as issues in the Project"
+      ],
+      "must_not": [
+        "prints a secret value",
+        "modifies code during the audit"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "skill": "repo-hardening",
+  "triggers": [
+    {
+      "prompt": "Protège la branche main",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Audit this repository's settings: secret scanning, Dependabot, CODEOWNERS",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Durcis le dépôt, permissions GitHub Actions",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Audit the web app's authentication routes",
+      "expect": "no-trigger",
+      "use_instead": "security-audit"
+    },
+    {
+      "prompt": "Rotate the leaked API key",
+      "expect": "no-trigger",
+      "use_instead": "secrets-hygiene"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Durcis le dépôt",
+      "must": [
+        "audits read-only by default",
+        "applies a protection only on explicit request",
+        "adapts to repository type and plan"
+      ],
+      "must_not": [
+        "force-changes branch rules without being asked"
+      ]
+    }
+  ]
+}

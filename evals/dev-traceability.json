@@ -1,0 +1,40 @@
+{
+  "skill": "dev-traceability",
+  "triggers": [
+    {
+      "prompt": "Prépare l'audit : matrice de traçabilité de cette release",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Trace this feature from requirement to merged PR",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Quelle est la definition of done pour cette PR ?",
+      "expect": "trigger"
+    },
+    {
+      "prompt": "Record the production deployment of this change",
+      "expect": "no-trigger",
+      "use_instead": "change-management"
+    },
+    {
+      "prompt": "What does this regex do?",
+      "expect": "no-trigger",
+      "use_instead": "none"
+    }
+  ],
+  "procedure": [
+    {
+      "prompt": "Prépare la matrice de traçabilité",
+      "must": [
+        "links requirement, issue, commit, PR, review and tests",
+        "reports gaps explicitly",
+        "states it is evidence, not certification"
+      ],
+      "must_not": [
+        "claims ISO certification"
+      ]
+    }
+  ]
+}
