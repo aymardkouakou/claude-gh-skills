@@ -9,7 +9,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 - `install.sh doctor` no longer reports missing symlinks when the `traceable-dev` plugin is installed (the two modes are exclusive).
 
 ### Added
-- 4 usage tests (188 tests in total).
+- 4 usage tests.
+- `hooks/` (plugin `PreToolUse` hook): `git commit -m …` is denied without `Refs|Fixes|Closes|Resolves #n` in repositories that adopted tracking (a Project is remembered by `repo-context`). A `No-Issue: <reason>` line documents an exception; `check-refs.sh` accepts it too. Fail-open when the commit cannot be inspected. Plugin install only (symlink installs have no hooks).
 
 ## [0.7.2] - 2026-11-05
 

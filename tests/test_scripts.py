@@ -102,6 +102,11 @@ class CheckRefs(unittest.TestCase):
         self.assertIn("NO REFERENCE", p.stdout)
         self.assertIn("1 commit(s) without an issue reference", p.stderr)
 
+    def test_documented_exception_is_accepted(self):
+        self.commit("feat: a\n\nRefs #12")
+        self.commit("chore: emergency\n\nNo-Issue: production hotfix, issue to follow")
+        self.assertEqual(self.check().returncode, 0)
+
 
 class Usage(unittest.TestCase):
     """Missing arguments print a readable usage line, not a raw bash error."""

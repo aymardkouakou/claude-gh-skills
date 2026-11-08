@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Aymard Kouakou - see NOTICE
-# List commits in a range that carry no issue reference (#n or owner/repo#n): check-refs.sh <base>..<head>
+# List commits in a range that carry no issue reference (Refs #n, owner/repo#n, or a documented `No-Issue: <reason>` line): check-refs.sh <base>..<head>
 # Exit code 1 if a reference is missing (usable in CI). Read-only.
 set -euo pipefail
 if [ $# -ne 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -11,7 +11,7 @@ range=$1
 missing=0
 while IFS=$'\t' read -r sha subject; do
   body=$(git show -s --format=%B "$sha")
-  if ! printf '%s' "$body" | grep -Eq '(Refs|Fixes|Closes|Resolves)[: ]+([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+'; then
+  if ! printf '%s' "$body" | grep -Eq '(Refs|Fixes|Closes|Resolves)[: ]+([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?#[0-9]+|^No-Issue:[[:space:]]*[^[:space:]]'; then
     printf 'NO REFERENCE  %s  %s\n' "${sha:0:8}" "$subject"; missing=$((missing+1))
   fi
 done < <(git log --no-merges --format='%H%x09%s' "$range")

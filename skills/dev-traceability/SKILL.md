@@ -29,7 +29,7 @@ Adapt controls to `ctx.py resolve` → `kind`: a solo personal account cannot sa
 ## Flow
 **Start.** Identify the requirement and the issue; none: propose `issue-lifecycle`. No change without an issue except an emergency fix (`change-management`). Check `docs/traceability/` and the PR template exist, else offer `references/project-init.md`.
 
-**During.** TDD or at least one targeted test per changed behaviour. Atomic commits with `Refs #<n>`; `${CLAUDE_SKILL_DIR}/check-refs.sh <base>..<head>` lists commits without a reference. No secret or personal data. Tell the user about any new dependency and record it in the PR.
+**During.** TDD or at least one targeted test per changed behaviour. Atomic commits with `Refs #<n>`; `${CLAUDE_SKILL_DIR}/check-refs.sh <base>..<head>` lists commits without a reference. With the plugin installed, a hook denies `git commit -m` without `Refs #<n>` in repositories that adopted tracking; a documented exception is a `No-Issue: <reason>` line. No secret or personal data. Tell the user about any new dependency and record it in the PR.
 
 **Before the PR.** Run `references/definition-of-done.md`; independent review with the `reviewer` agent (and `/security-review` in sensitive areas), each finding fixed or dismissed with the reason; update `docs/traceability/RTM.md` (requirement ↔ issue ↔ PR ↔ test).
 

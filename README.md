@@ -66,6 +66,8 @@ claude plugin install traceable-dev@aymardkouakou-skills
 
 Use **either** the plugin **or** the symlink install (`./install.sh`), not both: the same skills would load twice, once namespaced.
 
+The plugin also ships a hook (`hooks/`) that denies `git commit -m …` without `Refs #<n>` in repositories that adopted tracking (a Project remembered by `repo-context`); a documented exception is a `No-Issue: <reason>` line. Symlink installs have no hooks.
+
 Skills are then namespaced (`/traceable-dev:issue-lifecycle`). The manifests pass `claude plugin validate`; the install itself has not been exercised end to end.
 
 Update with `git pull && ./install.sh` (symlink install, removed skills are pruned) or `/plugin update` (plugin); remove with `./install.sh uninstall`. What changed in each version: [releases](https://github.com/aymardkouakou/claude-gh-skills/releases) and [`CHANGELOG.md`](CHANGELOG.md).
