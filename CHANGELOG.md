@@ -4,8 +4,6 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
-## [0.10.0] - 2026-11-08
-
 ### Changed
 - Skill descriptions tuned from the first live evaluation run (#27): task lists converted into sub-issues belong to `project-board` only (removed from `project-tracking`, which overlapped), `project-board` and `issue-lifecycle` gain the English and French phrases that were missed; two evaluation prompts made concrete. After isolating the runs, 28 re-run cases of the five failing skills pass; results vary between runs, so a single failure means re-run.
 
@@ -16,6 +14,10 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 - Label mode for `project-tracking` (`project.py use labels`, the user's choice): `attach`, `backfill` and `orphans` work with a `tracked` label and native epics when the token lacks the `project` scope or no Project is wanted; `create` and `visibility` still need a Project, `project-board` stops with a clear message; the exit 4 message offers the option (#23).
 - `dependencies.json` declares which sibling skills each skill requires or can optionally use, checked against the skills by a test; `scripts/check_deps.py` (also in `install.sh doctor`) reports missing siblings; `journal.sh`, `project.py` and `board.py` now stop with a message naming the missing skill instead of a traceback (#20).
 - `dev-traceability/rtm.py`: generates the requirements traceability matrix (Markdown or CSV) from GitHub issues and pull requests and the git history; flags closed issues with no commit, no test change, no pull request or no independent review; `--solo`, `--strict`, `--range`; text escaped against Markdown and spreadsheet-formula injection (#21).
+
+## [0.10.0] - 2026-11-08
+
+### Added
 - `scripts/release.py VERSION [--refs N …] [--apply] [--push]`: dry run by default; refuses a dirty tree, a branch other than main, a version that is not newer, an empty Unreleased section or failing tests; then bumps both manifests, dates the changelog, commits (`Refs`/`No-Issue`), tags, and with `--push` pushes and creates the GitHub release from the changelog section. Python instead of the shell script named in #22, for testability.
 - Hook guards in `hooks/require_issue_ref.py`: `gh pr create|edit --body` without a reference is denied, force-pushes to main or master are denied, `gh issue close N` asks for confirmation when no local commit mentions #N (#19).
 - `secrets-hygiene/scan_secrets.py`: read-only credential scan of tracked files (`path:line: rule`, never a value, 100 % statement coverage); `references/` for `security-audit` (read-only checklist commands), `secrets-hygiene` (inventory template) and `incident-response` (register, notification and post-mortem templates) (#18).
