@@ -36,5 +36,8 @@ Only for an incident in progress (`incident-response`). Record opened immediatel
 ## Never
 Self-approve; backdate or fabricate a record; put personal data or a secret in a record; deploy a major change without a rollback plan.
 
+## Tracking
+Each change record is an issue in the Project (`issue-lifecycle`, `project-tracking`), linked to the PR and release; the register entry cites it. An emergency change's retroactive review and follow-ups are sub-issues of that record, and the record stays open until the review is done.
+
 ## End of task
 Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log change-management ok|partial|failed [--note …]`.

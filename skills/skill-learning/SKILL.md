@@ -26,6 +26,9 @@ ${CLAUDE_SKILL_DIR}/learn.py log <skill> ok|partial|failed [--note "what was awk
 ## 3. Per-repository learning
 Facts that belong to one project (workflow, label scheme, CI names) are saved with `repo-context` (`ctx.py note KEY VALUE`), not in the skill text. Facts that hold for every project go into the skill through step 2.
 
+## 4. Tracking
+Each improvement brief the user approves becomes an issue in the skills repository (`issue-lifecycle`, `project-tracking`, Kind = Chore) and the resulting commits carry `Refs #<n>`; a rejected brief is noted in the history, not tracked.
+
 ## Rules
 - Evidence first: no change based on a single ambiguous run.
 - Keep every skill in English (see CONVENTIONS.md) and short; remove text when a rule is obsolete.

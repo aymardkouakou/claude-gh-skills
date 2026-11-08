@@ -60,6 +60,13 @@ class Conventions(unittest.TestCase):
                 continue
             self.assertIn("skill-learning/learn.py log", (d / "SKILL.md").read_text(encoding="utf-8"), d.name)
 
+    def test_finding_skills_have_a_tracking_section(self):
+        for name in ("security-audit", "repo-hardening", "secrets-hygiene", "change-management", "incident-response", "skill-learning"):
+            text = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertRegex(text, r"(?m)^## (\d\. )?Tracking$", name)
+            self.assertIn("issue-lifecycle", text, name)
+            self.assertIn("project-tracking", text, name)
+
 
 class Granularity(unittest.TestCase):
     """One responsibility per skill: short SKILL.md, long material in references/, triggers in the description."""

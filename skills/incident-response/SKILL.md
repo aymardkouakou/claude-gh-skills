@@ -23,5 +23,8 @@ Containment actions (disable a route, block a user, revoke sessions, stop a serv
 - Report gaps (emergency contacts "to be defined", no notification template) instead of filling them in.
 - Resolve the repository with `${CLAUDE_SKILL_DIR}/../repo-context/ctx.py repo` before opening tracking issues.
 
+## Tracking
+Open the incident issue at qualification (`issue-lifecycle`; severity P1-P4 in the title), attach it to the Project and an incident epic (`project-tracking`), and keep the timeline with `journal.sh`. Post-mortem actions are sub-issues with owner and due date; close the incident only after the post-mortem. No sensitive data in a public repository: use a private one or a reference.
+
 ## End of task
 Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log incident-response ok|partial|failed [--note …]`.

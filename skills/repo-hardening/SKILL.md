@@ -25,10 +25,13 @@ Adapt to `kind`: a personal private repository on a free plan may not offer bran
 8. **Traceability check**: a CI job running `${CLAUDE_SKILL_DIR}/../dev-traceability/check-refs.sh origin/<default>..HEAD`.
 
 ## Report
-Table: control, result, evidence (API field or `path:line`), action. Distinguish "verified now" from "declared". A critical gap opens an issue (`issue-lifecycle`, then `project-tracking`).
+Table: control, result, evidence (API field or `path:line`), action. Distinguish "verified now" from "declared". Gaps are tracked (see Tracking).
 
 ## Never
 Apply a setting unasked; disable a protection to unblock a task; print a secret value; assume a plan feature exists.
+
+## Tracking
+Every gap becomes an issue (`issue-lifecycle`) attached to the Project and a hardening epic (`project-tracking`, Kind = Security or Chore). A setting applied on request is recorded in that issue (control, before, after) and the issue is closed once re-verified.
 
 ## End of task
 Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log repo-hardening ok|partial|failed [--note …]`.

@@ -25,6 +25,7 @@ skills/<name>/*.py|*.sh         # helper scripts: standard library / POSIX only,
 - Safety rules are never weakened to remove friction: find a safer way to satisfy them.
 - A skill that uses GitHub resolves the repository through `repo-context` and passes `--repo` explicitly.
 - A skill ends with a one-line `skill-learning` log call.
+- A skill that produces findings, records or proposals has a `Tracking` section: an issue (`issue-lifecycle`) attached to the Project and an epic (`project-tracking`), commits `Refs #<n>`, and no secret value in issue text. Skills that only read or manage the tracking itself (`repo-context`, `project-*`, `issue-lifecycle`, `dev-traceability`) are exempt.
 
 ## State
 Runtime memory (active repository, usage history) lives in `~/.claude/skill-state/` (override: `CLAUDE_SKILL_STATE`). It is local, secret-free and never committed.

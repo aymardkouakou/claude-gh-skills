@@ -20,10 +20,13 @@ Read-only by default. No active test on a shared environment without approval. N
 10. **Money** (only if the project handles it): integer amounts, idempotency, atomic debit/credit, reversal instead of edit.
 
 ## Report
-Table: check, result (**compliant / gap / not verified**), evidence (`path:line`), severity (critical/high/medium), action. Distinguish "verified now" from "taken from a document". Line numbers drift: re-read the code before asserting. Critical gaps open an issue (`issue-lifecycle`, then `project-tracking`) and, before a release, block the change record (`change-management`). Repository settings (branch protection, secret scanning, workflow permissions): `repo-hardening`.
+Table: check, result (**compliant / gap / not verified**), evidence (`path:line`), severity (critical/high/medium), action. Distinguish "verified now" from "taken from a document". Line numbers drift: re-read the code before asserting. Gaps are tracked (see Tracking) and, before a release, critical ones block the change record (`change-management`). Repository settings (branch protection, secret scanning, workflow permissions): `repo-hardening`.
 
 ## Never
 Silent fixes, active tests without approval, secrets in the output, "compliant" for something only documented.
+
+## Tracking
+Every gap becomes an issue, critical first (`issue-lifecycle`), attached to the Project and a security epic (`project-tracking`, Kind = Security). The issue states the check, `path:line` evidence and the action, never a secret value or exploit detail. Later commits carry `Refs #<n>`.
 
 ## End of task
 Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log security-audit ok|partial|failed [--note …]`.

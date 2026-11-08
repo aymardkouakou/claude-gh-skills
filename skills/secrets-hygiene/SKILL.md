@@ -27,5 +27,8 @@ disable-model-invocation: true
 - Concurrent rotation lock: remove it only after checking that no rotation is running.
 - Production: refuse the deployment while a secret is default or weak.
 
+## Tracking
+A suspected exposure, rotation or rollback is tracked: one issue per secret (`issue-lifecycle`) attached to the Project (`project-tracking`, Kind = Security). Names, dates and steps only; never a value, even partial. Log each step in the journal and close after verification.
+
 ## End of task
 Log the run: `${CLAUDE_SKILL_DIR}/../skill-learning/learn.py log secrets-hygiene ok|partial|failed [--note …]`.

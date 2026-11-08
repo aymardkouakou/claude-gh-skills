@@ -2,6 +2,11 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [Unreleased]
+
+### Changed
+- `security-audit`, `repo-hardening`, `secrets-hygiene`, `change-management`, `incident-response` and `skill-learning` gain a `Tracking` section: findings, records and approved proposals become issues attached to the Project and an epic (every gap, not only critical ones; never a secret value in issue text). Rule added to `CONVENTIONS.md`, enforced by a conventions test (196 tests).
+
 ## [0.8.0] - 2026-11-08
 
 ### Fixed
