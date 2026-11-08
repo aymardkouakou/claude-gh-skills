@@ -4,6 +4,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-08
+
 ### Added
 - `scripts/release.py VERSION [--refs N …] [--apply] [--push]`: dry run by default; refuses a dirty tree, a branch other than main, a version that is not newer, an empty Unreleased section or failing tests; then bumps both manifests, dates the changelog, commits (`Refs`/`No-Issue`), tags, and with `--push` pushes and creates the GitHub release from the changelog section. Python instead of the shell script named in #22, for testability.
 - Hook guards in `hooks/require_issue_ref.py`: `gh pr create|edit --body` without a reference is denied, force-pushes to main or master are denied, `gh issue close N` asks for confirmation when no local commit mentions #N (#19).
