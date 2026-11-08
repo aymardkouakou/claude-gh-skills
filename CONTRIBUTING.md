@@ -10,7 +10,7 @@ Issues and pull requests on this repository are the only way the skills evolve: 
    (Python 3.9 or newer) and, for plugin changes, `claude plugin validate .`.
 4. **Update the documentation first**: `README.md` (skill table, commands, limits), the affected `SKILL.md` and `references/`, then `CHANGELOG.md`; tests check that every skill is listed in the README.
 5. A new or changed skill needs its `evals/<skill>.json` (trigger prompts, no-trigger prompts pointing to the right sibling skill, procedure checks); replay it with `python3 evals/run.py --skill <skill> --run` when you change a description.
-6. List the change in `CHANGELOG.md`.
+6. List the change in `CHANGELOG.md`, under `## [Unreleased]` (never under a released version).
 
 Releases follow SemVer and keep `.claude-plugin/*.json` in step with the changelog (a test checks it). The maintainer cuts them with `python3 scripts/release.py X.Y.Z --refs N --apply [--push]`; without `--apply` it is a dry run.
 

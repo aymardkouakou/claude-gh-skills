@@ -50,7 +50,7 @@ Follow the project's PR flow (CLAUDE.md, CONTRIBUTING, `notes`). Commits and PRs
 ## 5. Verify, then close
 1. Verify in real conditions (replay the failing scenario) and paste the result.
 2. Complete Fix, Verification, Prevention (test, CI guard, runbook, alert, skill or CLAUDE.md update); retrospective in the journal; summary comment.
-3. `gh issue close <n> --repo "$REPO" --reason completed` (or `"not planned"` with a justification when the risk is accepted).
+3. Prefer closing through the change itself: `Fixes #<n>` in the commit or merge message closes the issue when it reaches the default branch, a few seconds after the push. Re-check the state after about 10 s before concluding that it did not close, and do not list open issues straight after a push. Closing by hand: `gh issue close <n> --repo "$REPO" --reason completed --comment "<commit or PR>"` (or `"not planned"` with a justification when the risk is accepted); with the plugin, the hook asks you to confirm a close that no commit mentions.
 4. If the error returns: `gh issue reopen <n>`, resume at step 3, no duplicate.
 
 Pitfalls (ignored files, chained checks and merges, destructive commands): `references/pitfalls.md`. A fix that reaches production also follows `change-management` and `dev-traceability`.

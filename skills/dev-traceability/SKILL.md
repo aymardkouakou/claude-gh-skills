@@ -33,6 +33,8 @@ Adapt controls to `ctx.py resolve` → `kind`: a solo personal account cannot sa
 
 **Before the PR.** Run `references/definition-of-done.md`; independent review with the `reviewer` agent (and `/security-review` in sensitive areas), each finding fixed or dismissed with the reason; update `docs/traceability/RTM.md` (requirement ↔ issue ↔ PR ↔ test): generate it with `${CLAUDE_SKILL_DIR}/rtm.py [--solo] [--format csv] [--range BASE..HEAD] > docs/traceability/RTM.md` (read-only; issues, commits `Refs #n`, PRs, independent review, changed test files, gaps; `--strict` fails CI on closed issues with gaps; `--solo` for a single-maintainer repository, documented as an exception).
 
+**Closure.** `Fixes #<n>` closes the issue after the push; GitHub needs a few seconds, so check the state again before reporting an issue as still open. A pull request or release that cites no issue breaks the chain (the hook denies `gh pr create --body` without `Refs`).
+
 **Audit.** Control table and indicators: `references/compliance-report.md`.
 
 Platform controls (branch protection, secret scanning, CODEOWNERS, templates): `repo-hardening`.

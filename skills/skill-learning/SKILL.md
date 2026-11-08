@@ -23,6 +23,8 @@ ${CLAUDE_SKILL_DIR}/learn.py log <skill> ok|partial|failed [--note "what was awk
 4. Apply changes **in the skills repository** (not in the installed copy, which may be a symlink or a plugin cache that updates overwrite), on a branch named `improve/<skill>-<topic>`, with a Conventional Commit message in English and an entry in `CHANGELOG.md`. Run the repository tests (`python3 -m unittest discover -s tests`).
 5. Show the diff and the evidence to the user. **Never merge, push or publish without an explicit request.**
 
+Measure before and after: `python3 evals/run.py --skill <name> [--run]` replays the trigger prompts of the skills repository (see CONVENTIONS.md, Descriptions). A change of description is kept only if the cases that failed now pass and the others still do; a single failure can be noise, so re-run before editing.
+
 ## 3. Per-repository learning
 Facts that belong to one project (workflow, label scheme, CI names) are saved with `repo-context` (`ctx.py note KEY VALUE`), not in the skill text. Facts that hold for every project go into the skill through step 2.
 
