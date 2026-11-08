@@ -63,6 +63,78 @@ class RequireIssueRef(unittest.TestCase):
         for cmd in ('git commit -am "x"', 'git commit --message="x"', 'git -C . commit -m "x"'):
             self.assertEqual(self.run_hook(cmd).returncode, 2, cmd)
 
+    def git(self, *args):
+        subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *args], cwd=self.repo, check=True,
+                       capture_output=True)
+
+    def test_pull_request_body_needs_a_reference(self):
+        self.track()
+        self.assertEqual(self.run_hook('gh pr create --title t --body "Adds x"').returncode, 2)
+        self.assertEqual(self.run_hook('gh pr edit 4 -b "Adds x"').returncode, 2)
+        self.assertEqual(self.run_hook('gh pr create --body "Adds x\n\nRefs #12"').returncode, 0)
+        self.assertEqual(self.run_hook('gh pr create --body "x\n\nNo-Issue: typo"').returncode, 0)
+        for cmd in ("gh pr create --fill", "gh pr create --body-file b.md", "gh pr view 4"):
+            self.assertEqual(self.run_hook(cmd).returncode, 0, cmd)
+        bare = self.run_hook('gh pr create --body "x"', cwd=self.repo.parent)
+        self.assertEqual(bare.returncode, 0)
+
+    def test_force_push_to_protected_branch_is_denied(self):
+        self.track()
+        self.git("checkout", "-q", "-b", "main")
+        for cmd in ("git push --force origin main", "git push -f", "git push --force-with-lease origin HEAD:main",
+                    "git push origin +main", "git push -uf origin main", "git push --mirror origin",
+                    "git push --force-with-lease=main origin main", "git status && git push -f origin refs/heads/main"):
+            p = self.run_hook(cmd)
+            self.assertEqual(p.returncode, 2, cmd)
+            self.assertIn("Force-push blocked", p.stderr)
+
+    def test_other_pushes_pass(self):
+        self.track()
+        self.git("checkout", "-q", "-b", "feature")
+        for cmd in ("git push origin main", "git push", "git push -u origin feature", "git push --force origin feature",
+                    "git push -f", "git push --follow-tags origin feature", 'git push -f "unterminated'):
+            self.assertEqual(self.run_hook(cmd).returncode, 0, cmd)
+        self.assertEqual(self.run_hook("git push -f", cwd=self.repo.parent).returncode, 0)
+
+    def test_force_push_in_untracked_repository_is_untouched(self):
+        self.git("checkout", "-q", "-b", "main")
+        self.assertEqual(self.run_hook("git push -f origin main").returncode, 0)
+
+    def test_detached_head_force_push_is_not_blocked(self):
+        self.track()
+        self.git("commit", "-q", "--allow-empty", "-m", "x")
+        self.git("checkout", "-q", "--detach")
+        self.assertEqual(self.run_hook("git push -f").returncode, 0)
+
+    def ask(self, command):
+        p = self.run_hook(command)
+        self.assertEqual(p.returncode, 0, command)
+        return json.loads(p.stdout)["hookSpecificOutput"] if p.stdout else None
+
+    def test_closing_an_issue_without_a_commit_asks(self):
+        self.track()
+        out = self.ask("gh issue close 9")
+        self.assertEqual(out["permissionDecision"], "ask")
+        self.assertIn("#9", out["permissionDecisionReason"])
+        self.assertIsNotNone(self.ask('gh issue close #9 --comment "done" && echo ok'))
+
+    def test_closing_an_issue_with_a_linked_change_passes(self):
+        self.track()
+        self.git("commit", "-q", "--allow-empty", "-m", "feat: x\n\nRefs #9")
+        self.assertIsNone(self.ask("gh issue close 9"))
+        self.assertIsNotNone(self.ask("gh issue close 90"))
+        self.assertIsNone(self.ask('gh issue close 91 --comment "Delivered in 5e8cc73"'))
+        self.assertIsNone(self.ask('gh issue close 92 --comment "Merged in #30"'))
+
+    def test_close_edge_cases_pass(self):
+        self.track()
+        self.assertIsNone(self.ask("gh issue close"))
+        self.assertIsNone(self.ask("gh issue view 9"))
+        self.assertIsNone(self.ask('gh issue close 9 --comment "unterminated'))
+        untracked = Path(self.state / "repos" / "github.com__acme__app.json")
+        untracked.unlink()
+        self.assertIsNone(self.ask("gh issue close 9"))
+
 
 if __name__ == "__main__":
     unittest.main()
