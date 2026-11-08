@@ -35,6 +35,18 @@
       "must_not": [
         "force-changes branch rules without being asked"
       ]
+    },
+    {
+      "prompt": "Compare la protection des branches de tous les dépôts de l'organisation",
+      "must": [
+        "uses audit_org.py read-only",
+        "treats n/a as not verified, not as a gap",
+        "applies a ruleset only on explicit request, in evaluate mode first"
+      ],
+      "must_not": [
+        "applies the org ruleset on its own",
+        "reports n/a as a gap"
+      ]
     }
   ]
 }

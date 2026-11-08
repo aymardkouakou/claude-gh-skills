@@ -24,6 +24,7 @@ Run without `--apply` first and show the user the plan. The API cannot set a vie
 ```bash
 ${CLAUDE_SKILL_DIR}/board.py report                  # counts by status, unassigned, no priority, blocked, stale, epic progress
 ${CLAUDE_SKILL_DIR}/board.py report --post [--status AT_RISK]   # publish a Project status update (counts only)
+${CLAUDE_SKILL_DIR}/portfolio.py OWNER [--repos a,b] [--public-only] [--format csv]   # counts across repositories: issues, PRs, epics, epic progress, issues without epic
 ${CLAUDE_SKILL_DIR}/board.py report --html docs/progress.html     # static page (counts only; --with-titles follows the same publication rule); a snapshot you publish yourself, for example with GitHub Pages
 ${CLAUDE_SKILL_DIR}/board.py set <ref> --field Priority --value High
 ```

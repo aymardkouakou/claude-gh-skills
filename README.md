@@ -103,6 +103,8 @@ Update with `git pull && ./install.sh` (symlink install, removed skills are prun
 ~/.claude/skills/project-board/board.py setup  --apply   # fields: Priority, Kind, Estimate, Target date, Iteration
 ~/.claude/skills/project-board/board.py views  --apply   # the 15 standard views below (idempotent)
 ~/.claude/skills/project-board/board.py report [--post]  # metrics; --post publishes counts only (no titles)
+~/.claude/skills/project-board/portfolio.py OWNER [--public-only]   # multi-repository counts (issues, PRs, epic progress), read-only
+~/.claude/skills/repo-hardening/audit_org.py OWNER [--strict]        # compare branch rules and secret scanning across an owner's repositories
 ~/.claude/skills/project-board/board.py report --html docs/progress.html   # static, self-contained page (no script); publish it yourself, e.g. GitHub Pages
 ~/.claude/skills/project-board/board.py set 12 --field Priority --value High
 ~/.claude/skills/project-board/board.py draft "Plan next iteration" ; board.py drafts ; board.py convert <item-id>

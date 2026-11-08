@@ -24,6 +24,8 @@ Adapt to `kind`: a personal private repository on a free plan may not offer bran
 7. **Environments**: `staging` and `production` with required reviewers before deployment.
 8. **Traceability check**: a CI job running `${CLAUDE_SKILL_DIR}/../dev-traceability/check-refs.sh origin/<default>..HEAD`.
 
+Several repositories of one owner: `${CLAUDE_SKILL_DIR}/audit_org.py OWNER [--repos a,b] [--strict]` compares default-branch rules (rulesets and classic protection) and secret scanning, read-only; `n/a` is not a gap. A shared baseline to review and apply yourself, first in `evaluate` mode, is `references/org-ruleset.json` (`gh api -X POST orgs/OWNER/rulesets --input …`, organization owners only, on explicit request).
+
 ## Report
 Table: control, result, evidence (API field or `path:line`), action. Distinguish "verified now" from "declared". Gaps are tracked (see Tracking).
 
