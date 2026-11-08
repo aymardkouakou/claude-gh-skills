@@ -24,6 +24,7 @@ if ! python3 -I "$here/text_guard.py" "$file"; then
   echo "REFUSED: the text looks like a secret. Redact it and retry." >&2; exit 3
 fi
 ctx="$here/../repo-context/ctx.py"
+[ -f "$ctx" ] || { echo "The repo-context skill is missing (expected $ctx): install the whole plugin or run ./install.sh" >&2; exit 5; }
 if [ -z "$repo" ]; then
   repo=$(python3 -I "$ctx" repo) || { echo "No active repository: pass owner/repo." >&2; exit 4; }
 fi

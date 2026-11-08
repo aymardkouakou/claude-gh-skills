@@ -40,6 +40,7 @@ case "$cmd" in
       if [ "$plugin" = 0 ]; then chk "link $n"            "[ -L '$dest/$n' ] && [ \"\$(readlink '$dest/$n')\" = '${d%/}' ]"; fi
       chk "SKILL.md name=$n"   "grep -q '^name: $n\$' '$d/SKILL.md'"
     done
+    chk "skill dependencies"   "python3 '$repo/scripts/check_deps.py' --dir \"\$([ '$plugin' = 1 ] && echo '$repo/skills' || echo '$dest')\""
     chk "tests"                "python3 -m unittest discover -s '$repo/tests'"
     exit $ok;;
   *) echo "usage: $0 [install|doctor|uninstall]" >&2; exit 2;;

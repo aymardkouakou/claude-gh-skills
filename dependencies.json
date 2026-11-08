@@ -1,0 +1,14 @@
+{
+  "_comment": "requires = sibling skills a skill cannot work without; optional = siblings it can hand off to or log to. A test checks this file against the references in each skill.",
+  "change-management": {"requires": ["repo-context"], "optional": ["skill-learning"]},
+  "dev-traceability": {"requires": ["repo-context"], "optional": ["skill-learning"]},
+  "incident-response": {"requires": ["repo-context"], "optional": ["skill-learning"]},
+  "issue-lifecycle": {"requires": ["repo-context"], "optional": ["project-tracking", "skill-learning"]},
+  "project-board": {"requires": ["project-tracking", "repo-context"], "optional": ["skill-learning"]},
+  "project-tracking": {"requires": ["repo-context"], "optional": ["project-board", "skill-learning"]},
+  "repo-context": {"requires": [], "optional": []},
+  "repo-hardening": {"requires": ["repo-context"], "optional": ["dev-traceability", "skill-learning"]},
+  "secrets-hygiene": {"requires": [], "optional": ["skill-learning"]},
+  "security-audit": {"requires": [], "optional": ["secrets-hygiene", "skill-learning"]},
+  "skill-learning": {"requires": [], "optional": []}
+}

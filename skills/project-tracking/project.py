@@ -165,6 +165,8 @@ def pr_orphans(prs, owner, number):
 
 
 def ctx(*args):
+    if not CTX.is_file():
+        return 127, "", f"the repo-context skill is missing (expected {CTX}): install the whole plugin or run ./install.sh"
     return run([sys.executable, str(CTX), *args])
 
 

@@ -48,7 +48,7 @@ cd claude-gh-skills
 
 Requirements: `git`, `python3` ≥ 3.9 (standard library only) and, for GitHub features, `gh` logged in. To attach issues to Projects the token needs the `project` scope: `gh auth refresh -s project`.
 
-Install **all** skills: they call each other through sibling directories (`${CLAUDE_SKILL_DIR}/../<name>/`), for example `issue-lifecycle` uses `repo-context`.
+Install **all** skills: they call each other through sibling directories (`${CLAUDE_SKILL_DIR}/../<name>/`), for example `issue-lifecycle` uses `repo-context`. [`dependencies.json`](dependencies.json) lists what each skill requires or can optionally use; `python3 scripts/check_deps.py` (also part of `./install.sh doctor`) reports a missing sibling, and the scripts stop with a message naming it.
 
 ### As a Claude Code plugin
 

@@ -7,6 +7,7 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 ## [0.10.0] - 2026-11-08
 
 ### Added
+- `dependencies.json` declares which sibling skills each skill requires or can optionally use, checked against the skills by a test; `scripts/check_deps.py` (also in `install.sh doctor`) reports missing siblings; `journal.sh`, `project.py` and `board.py` now stop with a message naming the missing skill instead of a traceback (#20).
 - `dev-traceability/rtm.py`: generates the requirements traceability matrix (Markdown or CSV) from GitHub issues and pull requests and the git history; flags closed issues with no commit, no test change, no pull request or no independent review; `--solo`, `--strict`, `--range`; text escaped against Markdown and spreadsheet-formula injection (#21).
 - `scripts/release.py VERSION [--refs N …] [--apply] [--push]`: dry run by default; refuses a dirty tree, a branch other than main, a version that is not newer, an empty Unreleased section or failing tests; then bumps both manifests, dates the changelog, commits (`Refs`/`No-Issue`), tags, and with `--push` pushes and creates the GitHub release from the changelog section. Python instead of the shell script named in #22, for testability.
 - Hook guards in `hooks/require_issue_ref.py`: `gh pr create|edit --body` without a reference is denied, force-pushes to main or master are denied, `gh issue close N` asks for confirmation when no local commit mentions #N (#19).

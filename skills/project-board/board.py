@@ -33,7 +33,10 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-_spec = importlib.util.spec_from_file_location("project", Path(__file__).resolve().parent.parent / "project-tracking" / "project.py")
+_PROJECT_PY = Path(__file__).resolve().parent.parent / "project-tracking" / "project.py"
+if not _PROJECT_PY.is_file():
+    sys.exit(f"board.py needs the project-tracking skill (expected {_PROJECT_PY}): install the whole plugin or run ./install.sh")
+_spec = importlib.util.spec_from_file_location("project", _PROJECT_PY)
 project = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(project)
 
