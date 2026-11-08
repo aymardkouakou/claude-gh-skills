@@ -31,7 +31,7 @@ Adapt controls to `ctx.py resolve` → `kind`: a solo personal account cannot sa
 
 **During.** TDD or at least one targeted test per changed behaviour. Atomic commits with `Refs #<n>`; `${CLAUDE_SKILL_DIR}/check-refs.sh <base>..<head>` lists commits without a reference. With the plugin installed, a hook denies `git commit -m` without `Refs #<n>` in repositories that adopted tracking; a documented exception is a `No-Issue: <reason>` line. No secret or personal data. Tell the user about any new dependency and record it in the PR.
 
-**Before the PR.** Run `references/definition-of-done.md`; independent review with the `reviewer` agent (and `/security-review` in sensitive areas), each finding fixed or dismissed with the reason; update `docs/traceability/RTM.md` (requirement ↔ issue ↔ PR ↔ test).
+**Before the PR.** Run `references/definition-of-done.md`; independent review with the `reviewer` agent (and `/security-review` in sensitive areas), each finding fixed or dismissed with the reason; update `docs/traceability/RTM.md` (requirement ↔ issue ↔ PR ↔ test): generate it with `${CLAUDE_SKILL_DIR}/rtm.py [--solo] [--format csv] [--range BASE..HEAD] > docs/traceability/RTM.md` (read-only; issues, commits `Refs #n`, PRs, independent review, changed test files, gaps; `--strict` fails CI on closed issues with gaps; `--solo` for a single-maintainer repository, documented as an exception).
 
 **Audit.** Control table and indicators: `references/compliance-report.md`.
 

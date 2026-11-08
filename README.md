@@ -90,6 +90,7 @@ Update with `git pull && ./install.sh` (symlink install, removed skills are prun
 ~/.claude/skills/project-tracking/project.py attach 31 --epic 12 [--replace]   # add to the Project and make it a sub-issue (--replace: move it)
 ~/.claude/skills/project-tracking/project.py attach 40 --pr                    # open pull request -> Project
 ~/.claude/skills/project-tracking/project.py detach 31 --epic 12               # remove the sub-issue link
+~/.claude/skills/dev-traceability/rtm.py [--solo] [--format csv]              # traceability matrix: issue, commits, PRs, review, tests, gaps
 ~/.claude/skills/secrets-hygiene/scan_secrets.py [PATH]                     # read-only credential scan: path:line: rule, never a value
 ~/.claude/skills/project-tracking/project.py backfill --epic 12 --apply
 ```
