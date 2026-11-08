@@ -118,6 +118,24 @@ class Metrics(unittest.TestCase):
         self.assertNotIn("evil\n", text)
         self.assertIn("Todo: 1", text)
 
+    def test_render_html_escapes_and_stays_static(self):
+        m = board.metrics([item('<img src=x onerror=alert(1)>', "Todo", 1, labels=["epic"]),
+                           item("done", "Done<b>", 2)], {}, {1: (1, 2)}, now=NOW)
+        page = board.render_html(m, "acme/<2>", "AT_RISK", titles=True, now=NOW)
+        self.assertNotIn("<img", page)
+        self.assertNotIn("<b>", page)
+        self.assertIn("&lt;img", page)
+        self.assertIn("acme/&lt;2&gt;", page)
+        self.assertIn("default-src 'none'", page)
+        self.assertNotIn("<script", page)
+        self.assertIn("At risk", page)
+        self.assertIn("2026-11-05", page)
+        counts = board.render_html(m, "p", "UNKNOWN", titles=False, now=NOW)
+        self.assertNotIn("&lt;img", counts)
+        self.assertIn("UNKNOWN", counts)
+        empty = board.render_html(board.metrics([], now=NOW), "p", "ON_TRACK")
+        self.assertIn("No epic.", empty)
+
     def test_parse_time(self):
         self.assertEqual(board.parse_time("2026-11-05T00:00:00Z"), NOW)
         self.assertIsNone(board.parse_time(None))
@@ -355,6 +373,29 @@ class Main(unittest.TestCase):
         self.assertNotIn('"epic"', variables["body"])   # counts only by default: no titles in a published update
         rc, out, _ = self.call("report", "--post")
         self.assertIn("status update posted: ON_TRACK", out)
+
+    def test_html_report_is_written_counts_only(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            page = Path(d) / "report.html"
+            rc, out, _ = self.call("report", "--html", str(page))
+            self.assertEqual(rc, 0)
+            self.assertIn("page written", out)
+            text = page.read_text(encoding="utf-8")
+            self.assertIn("<progress", text)
+            self.assertNotIn("<script", text)
+            self.assertNotIn("Epic title", text)
+
+    def test_html_with_titles_follows_the_publication_rule(self):
+        import tempfile
+        self.m["bootstrap"].return_value = ("acme", "app", "acme/app", {"writable": True, "visibility": "public"})
+        self.items = [item("epic", number=1, labels=["epic"], repo="acme/secret")]
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(project, "project_visibility", return_value="PUBLIC"):
+            page = Path(d) / "r.html"
+            rc, _, err = self.call("report", "--html", str(page), "--with-titles")
+            self.assertEqual((rc, "refused" in err, page.exists()), (2, True, False))
+        with mock.patch.object(project, "project_visibility", return_value=None):
+            self.assertEqual(self.call("report", "--html", "x.html", "--with-titles")[0], 2)
 
     def test_post_with_titles_is_refused_when_it_could_leak(self):
         self.m["bootstrap"].return_value = ("acme", "app", "acme/app", {"writable": True, "visibility": "public"})

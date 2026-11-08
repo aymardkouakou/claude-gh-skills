@@ -7,6 +7,7 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 ## [0.10.0] - 2026-11-08
 
 ### Added
+- `board.py report --html FILE`: static, self-contained progress page (status badge, counts, attention, epic progress bars; every value escaped, no script, restrictive CSP, light and dark). Counts only unless `--with-titles`, which follows the same publication rule as `--post`; the page is a snapshot that the user publishes (GitHub Pages or an artifact) (#25).
 - Label mode for `project-tracking` (`project.py use labels`, the user's choice): `attach`, `backfill` and `orphans` work with a `tracked` label and native epics when the token lacks the `project` scope or no Project is wanted; `create` and `visibility` still need a Project, `project-board` stops with a clear message; the exit 4 message offers the option (#23).
 - `dependencies.json` declares which sibling skills each skill requires or can optionally use, checked against the skills by a test; `scripts/check_deps.py` (also in `install.sh doctor`) reports missing siblings; `journal.sh`, `project.py` and `board.py` now stop with a message naming the missing skill instead of a traceback (#20).
 - `dev-traceability/rtm.py`: generates the requirements traceability matrix (Markdown or CSV) from GitHub issues and pull requests and the git history; flags closed issues with no commit, no test change, no pull request or no independent review; `--solo`, `--strict`, `--range`; text escaped against Markdown and spreadsheet-formula injection (#21).

@@ -12,6 +12,9 @@ Usage:
   board.py report   [--repo R] [--post] [--status S] [--with-titles]
                                                             follow-up metrics; --post publishes a Project status update
                                                             (counts only; titles only if --with-titles and nothing can leak)
+  board.py report   --html FILE [--with-titles] [--status S]
+                                                            also write a static, self-contained HTML page (no script, no
+                                                            external resource); titles follow the same publication rule
   board.py set      REF --field NAME --value V [--pr]       set a field value on an issue or pull request item
   board.py draft    TITLE [--body TEXT]                     add a draft item to the Project
   board.py drafts   [--repo R]                              list draft items
@@ -25,6 +28,7 @@ The API cannot set a view's grouping or sorting, nor enable the built-in workflo
 Exit codes as project.py: 0 ok, 1 differences found (dry run), 2 error, 3 project undetermined, 4 missing scope.
 """
 import argparse
+import html
 import importlib.util
 import json
 import os
@@ -162,6 +166,51 @@ def render_report(m, title, titles=True):
         name = f" {project.safe_title(e['title'])}" if titles else ""
         lines.append(f"Epic #{e['number']}{name}: {e['done']}/{e['total']} done")
     return lines
+
+
+STATUS_LABELS = {"ON_TRACK": "On track", "AT_RISK": "At risk", "OFF_TRACK": "Off track", "INACTIVE": "Inactive",
+                 "COMPLETE": "Complete"}
+HTML_STYLE = """:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--line:#d0d7de;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--bar:#0969da}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--line:#30363d;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--bar:#58a6ff}}
+body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}
+main{max-width:760px;margin:0 auto}h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.1rem;margin:28px 0 8px}
+.muted{color:var(--muted);font-size:.9rem}.badge{display:inline-block;padding:2px 10px;border:1px solid var(--line);border-radius:999px;font-weight:600}
+.ON_TRACK,.COMPLETE{color:var(--ok)}.AT_RISK{color:var(--warn)}.OFF_TRACK{color:var(--bad)}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+progress{width:100%;height:10px;accent-color:var(--bar)}"""
+
+
+def render_html(m, title, status, titles=False, now=None):
+    """A static page for the follow-up metrics. Every dynamic value is escaped; no script, no external resource."""
+    e = html.escape
+    now = now or datetime.now(timezone.utc)
+    rows = "".join(f"<tr><td>{e(k)}</td><td>{v}</td></tr>" for k, v in sorted(m["by_status"].items()))
+    attention = [("Unassigned", m["no_assignee"]), ("Without priority", m["no_priority"]), ("Blocked", m["blocked"]),
+                 (f"Stale (>= {STALE_DAYS} days)", m["stale"])]
+    att = "".join(f"<tr><td>{e(k)}</td><td>{v}</td></tr>" for k, v in attention)
+    epics = ""
+    for ep in m["epics"]:
+        name = f" {e(project.safe_title(ep['title']))}" if titles else ""
+        epics += (f"<p><strong>Epic #{int(ep['number'])}</strong>{name}<br><progress max=\"{int(ep['total'])}\" "
+                  f"value=\"{int(ep['done'])}\"></progress><span class=\"muted\">{int(ep['done'])}/{int(ep['total'])} done</span></p>")
+    return (f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+            f"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            f"<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\">"
+            f"<title>Progress report</title><style>{HTML_STYLE}</style></head><body><main>"
+            f"<h1>{e(title)}</h1><p><span class=\"badge {e(status)}\">{e(STATUS_LABELS.get(status, status))}</span> "
+            f"<span class=\"muted\">Snapshot of {now:%Y-%m-%d %H:%M} UTC, not live data</span></p>"
+            f"<p>{m['total']} item(s), {m['open']} open, {m['prs']} open PR(s), {m['drafts']} draft(s)</p>"
+            f"<h2>By status</h2><table>{rows}</table><h2>Attention</h2><table>{att}</table>"
+            f"<h2>Epics</h2>{epics or '<p class=\"muted\">No epic.</p>'}</main></body></html>\n")
+
+
+def ensure_titles_publishable(po, pn, kind, items, full):
+    vis = project.project_visibility(po, pn)
+    if vis is None:  # fail closed: unknown visibility is treated as the most exposed case
+        raise RuntimeError("refused: cannot determine the Project visibility. Publish the counts only (drop --with-titles).")
+    if not titles_may_be_published(vis == "PUBLIC", kind.get("visibility") == "public", items, full):
+        raise RuntimeError("refused: titles would be published on a public Project that shows items from "
+                           "other or non-public repositories. Publish the counts only (drop --with-titles).")
 
 
 def titles_may_be_published(project_public, repo_public, items, full):
@@ -313,7 +362,8 @@ def main(argv=None):
         if name == "report":
             s.add_argument("--post", action="store_true")
             s.add_argument("--status", choices=["INACTIVE", "ON_TRACK", "AT_RISK", "OFF_TRACK", "COMPLETE"])
-            s.add_argument("--with-titles", action="store_true", help="include epic titles in the published update")
+            s.add_argument("--with-titles", action="store_true", help="include epic titles in the published update or page")
+            s.add_argument("--html", metavar="FILE", help="also write a static HTML page (counts only unless --with-titles)")
         if name == "set":
             s.add_argument("ref")
             s.add_argument("--field", required=True)
@@ -387,15 +437,15 @@ def main(argv=None):
             items = list_items(po, pn)
             m = metrics(items, fetch_updated(full), epic_progress(items, owner, name))
             print("\n".join(render_report(m, f"{po}/{pn}")))
+            if a.html:
+                if a.with_titles:
+                    ensure_titles_publishable(po, pn, kind, items, full)
+                Path(a.html).write_text(render_html(m, f"{po}/{pn}", a.status or derive_status(m), a.with_titles), encoding="utf-8")
+                print(f"page written: {a.html} (a snapshot: publish it yourself, for example with GitHub Pages)")
             if a.post:
                 status = a.status or derive_status(m)
                 if a.with_titles:
-                    vis = project.project_visibility(po, pn)
-                    if vis is None:  # fail closed: unknown visibility is treated as the most exposed case
-                        raise RuntimeError("refused: cannot determine the Project visibility. Post the counts only (drop --with-titles).")
-                    if not titles_may_be_published(vis == "PUBLIC", kind.get("visibility") == "public", items, full):
-                        raise RuntimeError("refused: titles would be published on a public Project that shows items from "
-                                           "other or non-public repositories. Post the counts only (drop --with-titles).")
+                    ensure_titles_publishable(po, pn, kind, items, full)
                 lines = render_report(m, f"{po}/{pn}", titles=a.with_titles)
                 q = ("mutation($i:CreateProjectV2StatusUpdateInput!){createProjectV2StatusUpdate(input:$i){statusUpdate{id}}}")
                 project.gh_graphql_json(q, {"i": {"projectId": info["id"], "status": status, "body": "\n".join(lines)}})

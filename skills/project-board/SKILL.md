@@ -24,6 +24,7 @@ Run without `--apply` first and show the user the plan. The API cannot set a vie
 ```bash
 ${CLAUDE_SKILL_DIR}/board.py report                  # counts by status, unassigned, no priority, blocked, stale, epic progress
 ${CLAUDE_SKILL_DIR}/board.py report --post [--status AT_RISK]   # publish a Project status update (counts only)
+${CLAUDE_SKILL_DIR}/board.py report --html docs/progress.html     # static page (counts only; --with-titles follows the same publication rule); a snapshot you publish yourself, for example with GitHub Pages
 ${CLAUDE_SKILL_DIR}/board.py set <ref> --field Priority --value High
 ```
 `--post` is visible to everyone who can see the Project: counts only by default; `--with-titles` is refused when a public Project could expose other or non-public repositories, or when the visibility is unknown.
