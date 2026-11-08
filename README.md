@@ -148,7 +148,7 @@ GitHub's API creates a view with its name, layout and filter but **cannot set gr
 python3 -m unittest discover -s tests
 ```
 
-Behaviour evaluations of every skill (what must and must not trigger it, what its procedure must do) live in [`evals/`](evals).
+Behaviour evaluations of every skill (what must and must not trigger it, what its procedure must do) live in [`evals/`](evals). `python3 evals/run.py --skill repo-context` lists the cases; add `--run` to replay them against Claude Code (costs tokens, `--model haiku` and `--budget 0.30` per case by default). Trigger cases are graded automatically, procedure checks are printed for review with `--procedure`.
 
 Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENTIONS.md`](CONVENTIONS.md). Release history: [`CHANGELOG.md`](CHANGELOG.md). See also [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).
 

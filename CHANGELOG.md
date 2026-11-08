@@ -6,7 +6,7 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ### Added
 - `secrets-hygiene/scan_secrets.py`: read-only credential scan of tracked files (`path:line: rule`, never a value, 100 % statement coverage); `references/` for `security-audit` (read-only checklist commands), `secrets-hygiene` (inventory template) and `incident-response` (register, notification and post-mortem templates) (#18).
-- `evals/`: one behaviour evaluation file per skill (trigger and no-trigger prompts in English and French, procedure checks with `must` / `must_not`), structure enforced by `tests/test_evals.py`. A runner is still to come (#17).
+- `evals/`: one behaviour evaluation file per skill (trigger and no-trigger prompts in English and French, procedure checks with `must` / `must_not`), structure enforced by `tests/test_evals.py`. `evals/run.py` replays the trigger prompts with `claude -p` (dry run by default, `--run` to execute, per-case `--budget`), grades whether the `Skill` tool was called, and lists the procedure checks for human review (#17).
 
 ## [0.9.0] - 2026-11-08
 
