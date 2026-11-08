@@ -4,6 +4,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-11-08
+
 ### Changed
 - Lessons from the roadmap work folded into the skills: `issue-lifecycle` and `dev-traceability` say that `Fixes #n` closes an issue a few seconds after the push and to re-check before reporting it open, and how to close by hand; `skill-learning` points to `evals/run.py` to measure a description change; `CONVENTIONS.md` gains the rules on descriptions (one owner per task, concrete eval prompts, manual-only skills, run variance) and on the permanent `## [Unreleased]` heading; `CONTRIBUTING.md` repeats it; one more `issue-lifecycle` procedure case.
 
