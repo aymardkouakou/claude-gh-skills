@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """PreToolUse hook: block `git commit -m ...` without an issue reference in repositories that adopted tracking.
 

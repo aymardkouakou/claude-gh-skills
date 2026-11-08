@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """Refuse text that looks like a secret (exit code 1): tokens, keys, passwords, private keys. Usage: text_guard.py <file>."""
 import re

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """skill-learning: record how skills are used and turn the history into improvement briefs.
 

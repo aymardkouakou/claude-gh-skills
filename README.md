@@ -4,7 +4,7 @@
 
 [![release](https://img.shields.io/github/v/release/aymardkouakou/claude-gh-skills?display_name=tag&sort=semver&cacheSeconds=600)](https://github.com/aymardkouakou/claude-gh-skills/releases)
 ![skills](https://img.shields.io/badge/skills-11-blue)
-[![license](https://img.shields.io/github/license/aymardkouakou/claude-gh-skills)](LICENSE)
+[![license](https://img.shields.io/badge/license-source--available-blue)](LICENSE)
 ![python](<https://img.shields.io/badge/python-%E2%89%A53.9%20stdlib%20only-informational>)
 
 Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [Claude Code](https://claude.com/claude-code), written in English, versioned, tested (100 % statement coverage of the Python helpers, Python 3.9 to 3.12) and installed globally by symlink.
@@ -151,7 +151,7 @@ Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENT
 
 ## License
 
-[Apache-2.0](LICENSE) © 2026 [Aymard Kouakou](https://github.com/aymardkouakou). Reuse, modification and redistribution are free, **provided the [`NOTICE`](NOTICE) file and the copyright notice are kept** and significant changes are stated: the original author is always credited.
+[claude-gh-skills Source-Available License 1.0](LICENSE) © 2026 [Aymard Kouakou](https://github.com/aymardkouakou). Free to install and use (personal or commercial); the skills evolve **only through contributions to this repository** (issues and pull requests). Redistribution of the work or of modified versions elsewhere is not allowed, and the [`NOTICE`](NOTICE) and copyright notice must be kept. Versions up to v0.8.0 remain under Apache-2.0.
 
 ## Scope and limits
 

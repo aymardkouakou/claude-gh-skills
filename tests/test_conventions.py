@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """Repository conventions: English-only skills, frontmatter, no secrets or addresses."""
 import re
@@ -144,7 +144,7 @@ class Distribution(unittest.TestCase):
         self.assertFalse(plugin["name"].startswith(("claude", "anthropic")), "reserved plugin name prefix")
         latest = re.search(r"^## \[(\d+\.\d+\.\d+)\]", (ROOT / "CHANGELOG.md").read_text(), re.M).group(1)
         self.assertEqual(plugin["version"], latest, "plugin.json version must match the latest CHANGELOG release")
-        self.assertEqual(plugin["license"], "Apache-2.0")
+        self.assertEqual(plugin["license"], "SEE LICENSE IN LICENSE")
         self.assertTrue((ROOT / "NOTICE").exists() and (ROOT / "LICENSE").exists())
 
 

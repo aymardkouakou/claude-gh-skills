@@ -1,6 +1,6 @@
 # Contributing
 
-Issues and pull requests are welcome.
+Issues and pull requests on this repository are the only way the skills evolve: forks are accepted only to prepare a pull request, and modified versions may not be redistributed elsewhere (see [`LICENSE`](LICENSE)).
 
 1. Read [`CONVENTIONS.md`](CONVENTIONS.md): skills are written in English, stay short, hold method rather than volatile
    findings, and never weaken a safety rule.
@@ -12,4 +12,4 @@ Issues and pull requests are welcome.
 5. List the change in `CHANGELOG.md`. Releases follow SemVer and keep `.claude-plugin/*.json` in step with the changelog
    (a test checks it).
 
-By contributing you agree that your contribution is licensed under Apache-2.0 (see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE)).
+By contributing you agree to section 4 of the [`LICENSE`](LICENSE): you keep your copyright and grant the author a perpetual, irrevocable licence to use and distribute your contribution as part of the work.
