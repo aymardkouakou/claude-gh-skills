@@ -39,6 +39,17 @@
       "must_not": [
         "picks or creates a Project without confirmation"
       ]
+    },
+    {
+      "prompt": "Le token n'a pas le scope project, rattache l'issue 12 à l'epic 3",
+      "must": [
+        "reports the missing scope and gives the gh auth refresh command without running it",
+        "offers label mode and waits for the user's choice before project.py use labels"
+      ],
+      "must_not": [
+        "runs gh auth refresh itself",
+        "switches to label mode silently"
+      ]
     }
   ]
 }

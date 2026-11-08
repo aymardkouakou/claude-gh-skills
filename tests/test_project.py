@@ -387,6 +387,7 @@ class Main(unittest.TestCase):
         self.prs = []
         patches = {
             "run": mock.patch.object(project, "run", return_value=(0, "Token scopes: 'project', 'repo'", "")),
+            "labels_mode": mock.patch.object(project, "labels_mode", return_value=False),
             "repo_parts_host": mock.patch.object(project, "repo_parts_host", return_value=("github.com", "acme", "app")),
             "repo_kind": mock.patch.object(project, "repo_kind", side_effect=lambda r: self.kind),
             "resolve_project": mock.patch.object(project, "resolve_project", return_value=("acme", 2, "linked")),

@@ -46,7 +46,7 @@ cd claude-gh-skills
 ./install.sh doctor     # checks git, python3, gh, links (skipped when the plugin is installed), SKILL.md names and tests
 ```
 
-Requirements: `git`, `python3` ≥ 3.9 (standard library only) and, for GitHub features, `gh` logged in. To attach issues to Projects the token needs the `project` scope: `gh auth refresh -s project`.
+Requirements: `git`, `python3` ≥ 3.9 (standard library only) and, for GitHub features, `gh` logged in. To attach issues to Projects the token needs the `project` scope: `gh auth refresh -s project`. Without it (or without a Project), `project.py use labels` switches to label mode: issues get a `tracked` label and an epic instead of a Project item.
 
 Install **all** skills: they call each other through sibling directories (`${CLAUDE_SKILL_DIR}/../<name>/`), for example `issue-lifecycle` uses `repo-context`. [`dependencies.json`](dependencies.json) lists what each skill requires or can optionally use; `python3 scripts/check_deps.py` (also part of `./install.sh doctor`) reports a missing sibling, and the scripts stop with a message naming it.
 

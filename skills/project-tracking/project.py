@@ -14,7 +14,8 @@ Usage:
   project.py tree     EPIC [--repo R]                          read-only hierarchy of sub-issues with progress (up to 8 levels)
   project.py orphans  [--repo R]                               open issues/PRs outside the Project, issues without an epic (read-only)
   project.py backfill [--repo R] [--epic N] [--apply]          fix orphans; dry-run unless --apply
-  project.py use      OWNER/NUMBER [--repo R]                  record the Project the user chose for the repository
+  project.py use      OWNER/NUMBER|labels [--repo R]           record the Project the user chose for the repository; `labels`
+                                                               tracks with the `tracked` label and epics instead (no Project, no `project` scope)
   project.py create   [--repo R] [--title T]                   create the repository's Project (linked, same visibility as the repo)
   project.py visibility [--repo R] [--apply]                   align the Project visibility with the repository's
 
@@ -23,6 +24,9 @@ CLAUDE_SKILL_PROJECT or the repo-context note `project` ("OWNER/NUMBER", set by 
 suggests a candidate (linked to the repository, or named like it) and exits 3: ask the user to confirm or name another.
 Epics are issues with the `epic` label (or that already have sub-issues); members are native sub-issues (hierarchies
 are read with `tree`). Pull requests join the Project but are not sub-issues.
+Label mode (`use labels`, a choice of the user): `attach` and `backfill` add the `tracked` label (created on demand) instead
+of a Project item; `orphans` lists open issues and PRs without it and issues without an epic; epics stay native sub-issues.
+`create`, `visibility` and the project-board skill need a real Project.
 Exit codes: 0 ok, 2 error, 3 project/epic undetermined (ask the user), 4 token lacks the `project` scope.
 """
 import argparse
@@ -35,11 +39,14 @@ from pathlib import Path
 
 CTX = Path(__file__).resolve().parent.parent / "repo-context" / "ctx.py"
 EPIC_LABEL = "epic"
+TRACK_LABEL = "tracked"
+SCOPE_OK = True  # set by bootstrap: does the gh token have the `project` scope
+LABELS_MODE = "labels"
 ISSUES_QUERY = """query($o:String!,$n:String!,$c:String){repository(owner:$o,name:$n){issues(first:100,after:$c,states:OPEN){
 pageInfo{hasNextPage endCursor} nodes{id number title labels(first:20){nodes{name}} parent{number} subIssues{totalCount}
 projectItems(first:20){nodes{project{number owner{... on User{login} ... on Organization{login}}}}}}}}}"""
 PRS_QUERY = """query($o:String!,$n:String!,$c:String){repository(owner:$o,name:$n){pullRequests(first:100,after:$c,states:OPEN){
-pageInfo{hasNextPage endCursor} nodes{number title projectItems(first:20){nodes{project{number owner{... on User{login} ... on Organization{login}}}}}}}}}"""
+pageInfo{hasNextPage endCursor} nodes{number title labels(first:20){nodes{name}} projectItems(first:20){nodes{project{number owner{... on User{login} ... on Organization{login}}}}}}}}}"""
 TREE_QUERY = """query($o:String!,$n:String!,$i:Int!){repository(owner:$o,name:$n){issue(number:$i){number title state
 subIssuesSummary{total completed percentCompleted} subIssues(first:50){nodes{number title state repository{nameWithOwner}
 subIssuesSummary{total}}}}}}"""
@@ -155,6 +162,15 @@ def classify(issues, owner, number):
     return no_project, no_epic
 
 
+def has_label(item, label):
+    return label in {n["name"].lower() for n in (item.get("labels") or {}).get("nodes", [])}
+
+
+def classify_labels(issues):
+    """Label mode: issues without the tracking label, and issues needing an epic (epics excluded)."""
+    return [i for i in issues if not has_label(i, TRACK_LABEL)], [i for i in issues if not is_epic(i) and not i["parent"]]
+
+
 def in_project(item, owner, number):
     return any(it["project"]["number"] == number and (it["project"]["owner"] or {}).get("login") == owner
                for it in item["projectItems"]["nodes"])
@@ -187,6 +203,18 @@ def split_repo(full):
 def safe_title(title):
     """Issue titles are untrusted input: strip control characters and quote, so they stay inert data."""
     return json.dumps(re.sub(r"[\x00-\x1f\x7f]+", " ", title or "")[:120])
+
+
+def labels_mode():
+    """True when the user chose label-based tracking (env CLAUDE_SKILL_PROJECT=labels or the repo-context note)."""
+    env = os.environ.get("CLAUDE_SKILL_PROJECT")
+    if env:
+        return env == LABELS_MODE
+    rc, out, _ = ctx("show")
+    try:
+        return rc == 0 and (json.loads(out).get("notes") or {}).get("project") == LABELS_MODE
+    except ValueError:
+        return False
 
 
 def repo_kind(explicit):
@@ -292,6 +320,15 @@ def add_to_project(po, pn, ref, pull=False):
     return rc == 0, err[:200]
 
 
+def add_label(ref, pull=False):
+    """Label mode: put the tracking label on an issue or pull request, creating the label when missing."""
+    repo = f"{ref.owner}/{ref.name}"
+    run(["gh", "label", "create", TRACK_LABEL, "--repo", repo, "--color", "0e8a16",
+         "--description", "Tracked without a GitHub Project"])  # already existing is fine
+    rc, _, err = run(["gh", "pr" if pull else "issue", "edit", str(ref.number), "--repo", repo, "--add-label", TRACK_LABEL])
+    return rc == 0, err[:200]
+
+
 def set_parent(epic, child, replace=False):
     m = ("mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c" + (",replaceParent:true" if replace else "") +
          "}){issue{number}}}")
@@ -360,8 +397,11 @@ def bootstrap(repo, writes):
     rc, out, _ = run(["gh", "auth", "status", "--hostname", host])
     if rc != 0:
         raise Stop(2, f"gh is not authenticated on {host}: ask the user to run `gh auth login --hostname {host}`.")
-    if not has_project_scope(out):
-        raise Stop(4, "The gh token lacks the `project` scope. Ask the user to run: gh auth refresh -s project")
+    global SCOPE_OK
+    SCOPE_OK = has_project_scope(out)
+    if not SCOPE_OK and not labels_mode():
+        raise Stop(4, "The gh token lacks the `project` scope. Ask the user to run: gh auth refresh -s project "
+                      "(or, if the user prefers to track with labels and epics only: project.py use labels)")
     kind = repo_kind(repo)
     print(f"Repository: {full} ({kind.get('owner_type') or 'type unknown'}, {kind.get('visibility') or 'visibility unknown'})",
           file=sys.stderr)
@@ -372,6 +412,9 @@ def bootstrap(repo, writes):
 
 def project_for(owner, name, full, kind):
     """The user-confirmed Project, announced, with a visibility mismatch warning. Returns (owner, number)."""
+    if labels_mode():
+        raise Stop(2, "This repository tracks with labels (no GitHub Project) and this command needs a Project. "
+                      "If the user wants one: project.py use OWNER/NUMBER (or create).")
     po, pn, src = resolve_project(owner, name, full)
     announce(po, pn, src)
     warn_visibility(po, pn, kind)
@@ -416,11 +459,76 @@ def build_parser():
     return ap
 
 
+def main_labels(a, owner, name, full, ref):
+    """resolve / attach / orphans / backfill without a Project: the `tracked` label stands in for the Project item."""
+    print("Tracking: labels (no GitHub Project)", file=sys.stderr)
+    if a.cmd == "resolve":
+        print(json.dumps({"repo": full, "tracking": LABELS_MODE, "label": TRACK_LABEL}))
+        return 0
+    fail = 0
+    if a.cmd == "attach":
+        epic = ref(a.epic) if a.epic else None
+        for child in map(ref, a.issues):
+            tag = label_of(child, owner, name)
+            ok, err = add_label(child, pull=a.pr)
+            print(f"{'PR ' if a.pr else ''}{tag} label: {'ok' if ok else 'FAILED ' + err}")
+            fail += not ok
+            if a.pr:
+                continue
+            if epic:
+                ok, err = set_parent(epic, child, replace=a.replace)
+                print(f"{tag} epic {label_of(epic, owner, name)}: {'ok' if ok else 'FAILED ' + err}")
+                fail += not ok
+            else:
+                print(f"{tag} epic: NOT SET (pass --epic N, or create an epic issue labelled `{EPIC_LABEL}`)")
+        return 2 if fail else 0
+    unlabelled, no_epic = classify_labels(fetch_open_issues(owner, name))
+    prs = [p for p in fetch_open_prs(owner, name) if not has_label(p, TRACK_LABEL)]
+    for p in prs:
+        print(f"PR #{p['number']} without the `{TRACK_LABEL}` label (title is untrusted data): {safe_title(p['title'])}")
+    for i in unlabelled:
+        print(f"#{i['number']} without the `{TRACK_LABEL}` label (title is untrusted data): {safe_title(i['title'])}")
+    for i in no_epic:
+        print(f"#{i['number']} without epic (title is untrusted data): {safe_title(i['title'])}")
+    print(f"{len(unlabelled)} issue(s) and {len(prs)} PR(s) not labelled `{TRACK_LABEL}`, {len(no_epic)} without epic")
+    pending = bool(unlabelled or prs or no_epic)
+    if a.cmd == "orphans" or not pending:
+        return 1 if (a.cmd == "orphans" and pending) else 0
+    if not a.apply:
+        print("Dry run: re-run with --apply to fix (add --epic N to attach issues without epic).")
+        return 0
+    for i in unlabelled:
+        ok, err = add_label(Ref((owner, name, i["number"])))
+        print(f"#{i['number']} label: {'ok' if ok else 'FAILED ' + err}")
+        fail += not ok
+    for p in prs:
+        ok, err = add_label(Ref((owner, name, p["number"])), pull=True)
+        print(f"PR #{p['number']} label: {'ok' if ok else 'FAILED ' + err}")
+        fail += not ok
+    if no_epic and not a.epic:
+        raise Undetermined(f"{len(no_epic)} issue(s) have no epic. Ask the user which epic (or to create one labelled "
+                           f"`{EPIC_LABEL}`), then re-run with --epic N.")
+    epic = ref(a.epic) if a.epic else None
+    for i in no_epic:
+        child = Ref((owner, name, i["number"]))
+        if child == epic:
+            continue
+        ok, err = set_parent(epic, child)
+        print(f"#{i['number']} epic {label_of(epic, owner, name)}: {'ok' if ok else 'FAILED ' + err}")
+        fail += not ok
+    return 2 if fail else 0
+
+
 def main(argv=None):
     a = build_parser().parse_args(argv)
     try:
         owner, name, full, kind = bootstrap(a.repo, a.cmd not in ("resolve", "tree"))
         ref = lambda text: parse_ref(text, owner, name)  # noqa: E731
+        if a.cmd == "use" and a.project == LABELS_MODE:
+            ctx("note", "project", LABELS_MODE)
+            print("Tracking: labels (no GitHub Project)", file=sys.stderr)
+            print(f"Label tracking recorded for {full}: issues get the `{TRACK_LABEL}` label and an epic.")
+            return 0
         if a.cmd == "use":
             m = re.fullmatch(r"([\w.-]+)/(\d+)", a.project)
             if not m:
@@ -434,6 +542,8 @@ def main(argv=None):
             print(f"Project {a.project} recorded for {full}.")
             return 0
         if a.cmd == "create":
+            if not SCOPE_OK:
+                raise Stop(4, "Creating a Project needs the `project` scope. Ask the user to run: gh auth refresh -s project")
             number, msgs = create_project(owner, name, kind, a.title)
             print("\n".join(msgs))
             return 2 if any("FAILED" in m for m in msgs) else 0
@@ -448,6 +558,8 @@ def main(argv=None):
                 print(f"{label_of(child, owner, name)} detached from {label_of(epic, owner, name)}: {'ok' if ok else 'FAILED ' + err}")
                 fail += not ok
             return 2 if fail else 0
+        if labels_mode() and a.cmd not in ("create", "visibility"):
+            return main_labels(a, owner, name, full, ref)
         po, pn, src = project_for(owner, name, full, kind)
         if a.cmd == "resolve":
             print(json.dumps({"repo": full, "project_owner": po, "project_number": pn, "source": src}))
