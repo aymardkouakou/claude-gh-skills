@@ -32,7 +32,7 @@ class Rules(unittest.TestCase):
         self.assertEqual(rules("github_pat_" + "a" * 60), ["github-fine-grained-token"])
         self.assertEqual(rules("xoxb-" + "1" * 12), ["slack-token"])
         self.assertEqual(rules("sk_live_" + "a" * 20), ["stripe-live-key"])
-        self.assertEqual(rules("-----BEGIN RSA PRIVATE KEY-----"), ["private-key-block"])
+        self.assertEqual(rules("-----BEGIN RSA PRIVATE KEY-----"), ["private-key-block"])  # secret-scan: ignore
         self.assertEqual(rules("postgres://app:Zq8wxyz1@db/x"), ["credential-in-url"])  # secret-scan: ignore
         self.assertEqual(rules(CRED), ["hard-coded-credential"])
 
