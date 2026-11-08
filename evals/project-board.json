@@ -6,7 +6,7 @@
       "expect": "trigger"
     },
     {
-      "prompt": "Fais un rapport d'avancement du projet",
+      "prompt": "Fais un rapport d'avancement du Project GitHub de ce dépôt",
       "expect": "trigger"
     },
     {

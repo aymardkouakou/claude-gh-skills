@@ -10,7 +10,7 @@
       "expect": "trigger"
     },
     {
-      "prompt": "Bug récurrent sur l'authentification : documente la cause racine",
+      "prompt": "Le login renvoie 401 depuis hier, c'est la troisième fois : ouvre une issue et documente la cause racine",
       "expect": "trigger"
     },
     {

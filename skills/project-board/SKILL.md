@@ -1,6 +1,6 @@
 ---
 name: project-board
-description: Build and run the follow-up of the repository's GitHub Project - standard fields (priority, kind, estimate, target date, iteration), 15 standard views (board, backlog, current iteration, roadmap, epics, by epic, without epic, my work, needs triage, in review, blocked, bugs, security, stale, done), follow-up report with optional Project status update, field values, draft items, task lists to sub-issues. Use for "crée les vues", "tableau de bord du projet", "rapport d'avancement", "mise à jour de statut", "champs du projet", "brouillon". Not for attaching issues to the Project or epics (use project-tracking).
+description: Build and run the follow-up of the repository's GitHub Project - standard fields (priority, kind, estimate, target date, iteration), 15 standard views (board, backlog, current iteration, roadmap, epics, by epic, without epic, my work, needs triage, in review, blocked, bugs, security, stale, done), follow-up report with optional Project status update, field values, draft items, conversion of task lists (checklists) in an issue or epic body into sub-issues. Use for "crée les vues", "tableau de bord du projet", "rapport d'avancement" or "progress report", "convert this task list into sub-issues", "checklist en sous-issues", "mise à jour de statut", "champs du projet", "brouillon". Not for attaching issues to the Project or epics (use project-tracking).
 ---
 
 # Project board: fields, views, reports

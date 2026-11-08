@@ -6,6 +6,9 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [0.10.0] - 2026-11-08
 
+### Changed
+- Skill descriptions tuned from the first live evaluation run (#27): task lists converted into sub-issues belong to `project-board` only (removed from `project-tracking`, which overlapped), `project-board` and `issue-lifecycle` gain the English and French phrases that were missed; two evaluation prompts made concrete. After isolating the runs, 28 re-run cases of the five failing skills pass; results vary between runs, so a single failure means re-run.
+
 ### Added
 - `evals/run.py` runs each prompt in an empty temporary directory (the model could otherwise read the skill files instead of invoking them) and skips `manual` cases, the prompts of the skills only the user can start; first full run: 39 of 59 cases passed, 9 of the 20 failures were the manual skills (#27).
 - Organisation mode (#24): `project-board/portfolio.py OWNER` reports issues, pull requests, epics and epic progress across the repositories of an owner (counts only, `--public-only`, unreadable repositories do not stop it); `repo-hardening/audit_org.py OWNER` compares default-branch rules (effective rulesets, classic protection) and secret scanning across repositories, `n/a` when not verifiable, `--strict` for CI; `references/org-ruleset.json` is a baseline ruleset in `evaluate` mode to review and apply by hand. Both read-only.

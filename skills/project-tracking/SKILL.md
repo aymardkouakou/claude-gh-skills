@@ -1,6 +1,6 @@
 ---
 name: project-tracking
-description: Keep every GitHub issue and open pull request in the repository's GitHub Project and every issue under an epic (native sub-issues) - choose or create the Project (confirmed by the user, as visible as the repository), attach, move or detach issues, show the epic hierarchy, find and repair orphans, turn task lists into sub-issues. Use for "rattache à l'epic", "ajoute au projet", "issue orpheline", "sous-issues", "arborescence de l'epic", "crée le projet GitHub". Not for views, fields or reports (use project-board), nor for recording an error (use issue-lifecycle).
+description: Keep every GitHub issue and open pull request in the repository's GitHub Project and every issue under an epic (native sub-issues) - choose or create the Project (confirmed by the user, as visible as the repository), attach, move or detach issues, show the epic hierarchy, find and repair orphans. Use for "rattache à l'epic", "ajoute au projet", "issue orpheline", "sous-issues", "arborescence de l'epic", "crée le projet GitHub". Not for views, fields, reports or task lists to convert into sub-issues (use project-board), nor for recording an error (use issue-lifecycle).
 ---
 
 # Project tracking: Project, epics, sub-issues

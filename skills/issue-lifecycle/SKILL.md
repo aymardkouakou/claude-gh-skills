@@ -1,6 +1,6 @@
 ---
 name: issue-lifecycle
-description: Full lifecycle of an error in GitHub Issues - record it, keep a timestamped resolution journal, document the root cause, fix through the project's PR flow, verify, close. Use when an error takes more than one attempt to understand, touches CI, deployment, security or authentication, or may come back ("erreur", "bug récurrent", "ouvre une issue", "journal de résolution"). Not for placing issues in a Project or epic (use project-tracking), a typo fixed within a minute, nor a declared security incident (use incident-response first).
+description: Full lifecycle of an error in GitHub Issues - record it, keep a timestamped resolution journal, document the root cause, fix through the project's PR flow, verify, close. Use when an error takes more than one attempt to understand, touches CI, deployment, security or authentication, or may come back ("erreur", "bug récurrent", "recurring bug", "cause racine", "root cause", "ouvre une issue", "journal de résolution"). Not for placing issues in a Project or epic (use project-tracking), a typo fixed within a minute, nor a declared security incident (use incident-response first).
 ---
 
 # Error → Issue → Investigation → Fix → Closure
