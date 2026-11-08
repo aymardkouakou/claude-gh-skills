@@ -33,9 +33,11 @@ case "$cmd" in
     chk "python3"              "command -v python3"
     chk "gh installed"         "command -v gh"
     chk "gh authenticated"     "gh auth status"
+    plugin=0; if command -v claude >/dev/null 2>&1 && claude plugin list 2>/dev/null | grep -q 'traceable-dev@'; then plugin=1; fi
+    [ "$plugin" = 1 ] && echo "INFO    plugin traceable-dev installed: symlinks are not needed (the two modes are exclusive)"
     for d in "$repo"/skills/*/; do
       n=$(basename "$d")
-      chk "link $n"            "[ -L '$dest/$n' ] && [ \"\$(readlink '$dest/$n')\" = '${d%/}' ]"
+      if [ "$plugin" = 0 ]; then chk "link $n"            "[ -L '$dest/$n' ] && [ \"\$(readlink '$dest/$n')\" = '${d%/}' ]"; fi
       chk "SKILL.md name=$n"   "grep -q '^name: $n\$' '$d/SKILL.md'"
     done
     chk "tests"                "python3 -m unittest discover -s '$repo/tests'"

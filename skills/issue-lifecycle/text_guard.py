@@ -14,4 +14,12 @@ def looks_secret(text):
 
 
 if __name__ == "__main__":
-    sys.exit(1 if looks_secret(open(sys.argv[1], encoding="utf-8").read()) else 0)
+    if len(sys.argv) != 2 or sys.argv[1] in ("-h", "--help"):
+        print("Usage: text_guard.py <file>   (exit 1 if the text looks like a secret)", file=sys.stderr)
+        sys.exit(0 if len(sys.argv) == 2 else 2)
+    try:
+        text = open(sys.argv[1], encoding="utf-8").read()
+    except OSError as e:
+        print(f"text_guard.py: cannot read {sys.argv[1]}: {e.strerror}", file=sys.stderr)
+        sys.exit(2)
+    sys.exit(1 if looks_secret(text) else 0)

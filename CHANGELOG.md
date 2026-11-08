@@ -2,6 +2,15 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
+## [Unreleased]
+
+### Fixed
+- `journal.sh`, `check-refs.sh` and `text_guard.py` print a clear `Usage:` line (exit 2) on missing arguments, and accept `--help`; an unreadable file no longer produces a traceback.
+- `install.sh doctor` no longer reports missing symlinks when the `traceable-dev` plugin is installed (the two modes are exclusive).
+
+### Added
+- 4 usage tests (188 tests in total).
+
 ## [0.7.2] - 2026-11-05
 
 ### Changed

@@ -8,7 +8,12 @@
 # Without a repository: the active one (repo-context). Refuses to publish text that looks like a secret.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
-n=${1:?issue number}; type=${2:?type}; file=${3:?text file}; repo=${4:-}
+if [ $# -lt 3 ] || [ $# -gt 4 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: journal.sh <issue#> <type> <text-file> [owner/repo]" >&2
+  echo "Types: Observation | Hypothesis | Test | Result | Decision | Action | Interaction | \"Method error\" | Retrospective" >&2
+  [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ] && exit 0; exit 2
+fi
+n=$1; type=$2; file=$3; repo=${4:-}
 case "$type" in
   Hypothèse) type="Hypothesis";; Résultat) type="Result";; Décision) type="Decision";;
   "Erreur de méthode") type="Method error";; Rétrospective) type="Retrospective";;

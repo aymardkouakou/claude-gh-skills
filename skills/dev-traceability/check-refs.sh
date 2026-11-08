@@ -4,7 +4,10 @@
 # List commits in a range that carry no issue reference (#n or owner/repo#n): check-refs.sh <base>..<head>
 # Exit code 1 if a reference is missing (usable in CI). Read-only.
 set -euo pipefail
-range=${1:?git range, e.g. origin/main..HEAD}
+if [ $# -ne 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: check-refs.sh <base>..<head>   (e.g. origin/main..HEAD)" >&2; [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ] && exit 0; exit 2
+fi
+range=$1
 missing=0
 while IFS=$'\t' read -r sha subject; do
   body=$(git show -s --format=%B "$sha")

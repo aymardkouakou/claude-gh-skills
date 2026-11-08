@@ -103,5 +103,37 @@ class CheckRefs(unittest.TestCase):
         self.assertIn("1 commit(s) without an issue reference", p.stderr)
 
 
+class Usage(unittest.TestCase):
+    """Missing arguments print a readable usage line, not a raw bash error."""
+
+    def run_script(self, *cmd):
+        return subprocess.run(list(cmd), capture_output=True, text=True)
+
+    def test_journal_without_arguments(self):
+        p = self.run_script("bash", str(JOURNAL))
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("Usage: journal.sh", p.stderr)
+        self.assertNotIn("line ", p.stderr)
+
+    def test_check_refs_without_arguments(self):
+        p = self.run_script("bash", str(REFS))
+        self.assertEqual(p.returncode, 2)
+        self.assertIn("Usage: check-refs.sh", p.stderr)
+        self.assertNotIn("line ", p.stderr)
+
+    def test_help_flags_exit_zero(self):
+        for script in (JOURNAL, REFS):
+            self.assertEqual(self.run_script("bash", str(script), "--help").returncode, 0)
+
+    def test_text_guard_usage_and_unreadable_file(self):
+        guard = str(ROOT / "skills" / "issue-lifecycle" / "text_guard.py")
+        p = self.run_script("python3", "-I", guard, "--help")
+        self.assertEqual(p.returncode, 0)
+        self.assertIn("Usage: text_guard.py", p.stderr)
+        p = self.run_script("python3", "-I", guard, "/nonexistent/file")
+        self.assertEqual(p.returncode, 2)
+        self.assertNotIn("Traceback", p.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

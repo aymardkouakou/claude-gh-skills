@@ -43,7 +43,7 @@ Eleven [Agent Skills](https://docs.claude.com/en/docs/claude-code/skills) for [C
 git clone https://github.com/aymardkouakou/claude-gh-skills.git
 cd claude-gh-skills
 ./install.sh            # symlinks every skills/<name> into ~/.claude/skills
-./install.sh doctor     # checks git, python3, gh, links, SKILL.md names and tests
+./install.sh doctor     # checks git, python3, gh, links (skipped when the plugin is installed), SKILL.md names and tests
 ```
 
 Requirements: `git`, `python3` ≥ 3.9 (standard library only) and, for GitHub features, `gh` logged in. To attach issues to Projects the token needs the `project` scope: `gh auth refresh -s project`.
