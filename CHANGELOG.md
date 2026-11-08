@@ -4,6 +4,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-08
+
 ### Changed
 - **Licence 1.1** (legal review, #26; not legal advice, a lawyer's review is still advisable): adds a defined `Contribution`, a fuller contributor grant (originality and employer warranty, recipients covered, relicensing, moral rights, optional DCO `Signed-off-by`), a patent licence, a trademark clause, a 30-day limit on forks kept after a pull request, an acknowledgement of GitHub's own fork rights, and a version history; releases v0.9.0 to v0.11.0 stay under 1.0. SPDX headers become `LicenseRef-claude-gh-skills-1.1`.
 
