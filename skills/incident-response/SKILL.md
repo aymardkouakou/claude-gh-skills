@@ -17,6 +17,8 @@ Containment actions (disable a route, block a user, revoke sessions, stop a serv
 6. **Eradicate and recover**, then verify (service health and the business-level checks of the project).
 7. **Blameless post-mortem**: timeline, root cause, actions with owner and due date, follow-up issues (`issue-lifecycle`), emergency change record with retroactive review within 48 h (`change-management`).
 
+Templates (register, timeline, notification draft, post-mortem): `${CLAUDE_SKILL_DIR}/references/templates.md`.
+
 ## Rules
 - No personal data or secret in drafts and registers: technical identifiers only.
 - A leaked secret means immediate rotation (`secrets-hygiene`), not only deletion.

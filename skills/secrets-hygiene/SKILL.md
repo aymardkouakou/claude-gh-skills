@@ -20,7 +20,7 @@ disable-model-invocation: true
 4. **Apply**: the value changes in the vault **and** in the service (databases keep the old password in their volumes: `ALTER USER`, admin API). A secret shared between clients is rotated together.
 5. **Verify** service health, then regenerate the inventory.
 6. **Rollback**: keep the previous version until verification.
-7. **Scan before any PR**: look for hard-coded credentials in tracked files; file names containing `secret`, `password`, `credentials`, `*.key`, `*.pem` are often ignored by `.gitignore` (`git check-ignore -v`).
+7. **Scan before any PR**: run `${CLAUDE_SKILL_DIR}/scan_secrets.py` (read-only, prints `path:line: rule`, never a value) for hard-coded credentials in tracked files; inventory template: `${CLAUDE_SKILL_DIR}/references/inventory.md`; file names containing `secret`, `password`, `credentials`, `*.key`, `*.pem` are often ignored by `.gitignore` (`git check-ignore -v`).
 
 ## Pitfalls
 - Rotating a session key or a webhook secret invalidates sessions or requires warning the third party (payment or API providers, partners).

@@ -12,7 +12,7 @@ spec.loader.exec_module(tg)
 
 class TextGuard(unittest.TestCase):
     def test_flags_secrets(self):
-        for t in ["password=SuperSecret12345", "token: abcdefgh12345678", "ghp_" + "a" * 20, "-----BEGIN RSA PRIVATE KEY-----",
+        for t in ["password=SuperSecret12345", "token: abcdefgh12345678", "ghp_" + "a" * 20, "-----BEGIN RSA PRIVATE KEY-----",  # secret-scan: ignore
                   "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9", "AKIA" + "A" * 12]:
             self.assertTrue(tg.looks_secret(t), t)
 

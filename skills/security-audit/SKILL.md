@@ -19,6 +19,8 @@ Read-only by default. No active test on a shared environment without approval. N
 9. **Monitoring**: real alerts (rules and recipient), business metrics, backups whose restoration has been tested.
 10. **Money** (only if the project handles it): integer amounts, idempotency, atomic debit/credit, reversal instead of edit.
 
+Commands for each check: `${CLAUDE_SKILL_DIR}/references/checklist.md`. Hard-coded credentials: `${CLAUDE_SKILL_DIR}/../secrets-hygiene/scan_secrets.py` (never prints values).
+
 ## Report
 Table: check, result (**compliant / gap / not verified**), evidence (`path:line`), severity (critical/high/medium), action. Distinguish "verified now" from "taken from a document". Line numbers drift: re-read the code before asserting. Gaps are tracked (see Tracking) and, before a release, critical ones block the change record (`change-management`). Repository settings (branch protection, secret scanning, workflow permissions): `repo-hardening`.
 
