@@ -22,7 +22,7 @@ class Evals(unittest.TestCase):
             data = self.load(name)
             self.assertEqual(data["skill"], name)
             cases = data["triggers"]
-            positives = [c for c in cases if c["expect"] == "trigger"]
+            positives = [c for c in cases if c["expect"] in ("trigger", "manual")]
             negatives = [c for c in cases if c["expect"] == "no-trigger"]
             self.assertGreaterEqual(len(positives), 3, name)
             self.assertGreaterEqual(len(negatives), 2, name)
@@ -44,6 +44,8 @@ class Evals(unittest.TestCase):
         for name in SKILLS:
             text = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
             self.assertEqual("disable-model-invocation" in text, name in manual, name)
+            kinds = {c["expect"] for c in self.load(name)["triggers"] if c["expect"] != "no-trigger"}
+            self.assertEqual(kinds, {"manual"} if name in manual else {"trigger"}, name)
             if name in manual:
                 self.assertTrue(any(c["prompt"].startswith("/") for c in self.load(name)["triggers"]), name)
 

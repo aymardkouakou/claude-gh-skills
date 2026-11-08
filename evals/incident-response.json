@@ -3,15 +3,15 @@
   "triggers": [
     {
       "prompt": "/incident-response : fuite de données en production",
-      "expect": "trigger"
+      "expect": "manual"
     },
     {
       "prompt": "Production is down, qualify the severity",
-      "expect": "trigger"
+      "expect": "manual"
     },
     {
       "prompt": "Fraude détectée, que faire ?",
-      "expect": "trigger"
+      "expect": "manual"
     },
     {
       "prompt": "A bug in the date formatter",

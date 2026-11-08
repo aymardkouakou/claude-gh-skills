@@ -81,6 +81,17 @@ class Runner(unittest.TestCase):
         code, out = run_main(["--run", "--skill", "incident-response"], fake(["incident-response"]))
         self.assertIn("failed", out)
 
+    def test_manual_cases_are_not_graded_and_runs_use_an_empty_directory(self):
+        seen = []
+
+        def runner(cmd, **kw):
+            seen.append(kw["cwd"])
+            return SimpleNamespace(stdout=stream())
+        code, out = run_main(["--run", "--skill", "incident-response"], runner)
+        self.assertIn("SKIP incident-response: manual", out)
+        self.assertTrue(seen and all(d != str(ROOT) for d in seen))
+        self.assertIn("[manual] incident-response", run_main(["--skill", "incident-response"])[1])
+
     def test_unknown_skill(self):
         code, _ = run_main(["--skill", "nope"])
         self.assertEqual(code, 2)

@@ -3,15 +3,15 @@
   "triggers": [
     {
       "prompt": "/change-management : enregistre la mise en prod de v1.2",
-      "expect": "trigger"
+      "expect": "manual"
     },
     {
       "prompt": "Record, approve and verify this deployment",
-      "expect": "trigger"
+      "expect": "manual"
     },
     {
       "prompt": "Registre des changements pour ce déploiement",
-      "expect": "trigger"
+      "expect": "manual"
     },
     {
       "prompt": "Prod is down, customers affected",

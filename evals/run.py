@@ -4,8 +4,10 @@
 """Replay the trigger evaluations against Claude Code and grade them.
 
 A prompt is run with `claude -p` (stream-json); the skill counts as triggered when the model calls the
-`Skill` tool for it (or the prompt is its slash command and it is loaded). `no-trigger` cases pass when that
-skill is NOT invoked. Procedure checks are listed for human review: they are not auto-graded.
+`Skill` tool for it. `no-trigger` cases pass when that skill is NOT invoked. `manual` cases belong to skills that
+only the user can start (`disable-model-invocation`): they document the intended prompts and are not graded.
+Each prompt runs in an empty temporary directory so the model cannot read the skill files instead of invoking them.
+Model behaviour varies between runs: a single failure is a signal to re-run, a repeated one to improve the description. Procedure checks are listed for human review: they are not auto-graded.
 
 Usage: run.py [--skill NAME] [--run] [--model haiku] [--budget 0.30] [--procedure]
 Without --run nothing is executed (dry run: lists the cases). Each case costs tokens; --budget caps one case.
@@ -14,6 +16,7 @@ import argparse
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -57,7 +60,8 @@ def grade(case, skill, invoked):
 
 def run_case(prompt, model, budget, runner=subprocess.run):
     try:
-        done = runner(build_command(prompt, model, budget), capture_output=True, text=True, timeout=300)
+        with tempfile.TemporaryDirectory() as empty:
+            done = runner(build_command(prompt, model, budget), capture_output=True, text=True, timeout=300, cwd=empty)
     except (OSError, subprocess.TimeoutExpired) as exc:
         return None, f"run failed: {type(exc).__name__}"
     return invoked_skills(done.stdout), ""
@@ -79,6 +83,9 @@ def main(argv=None, runner=subprocess.run):
     for d in data:
         for case in d["triggers"]:
             total += 1
+            if case["expect"] == "manual":
+                print(f"[manual] {d['skill']}: {case['prompt']}" if not args.run else f"SKIP {d['skill']}: manual: {case['prompt']}")
+                continue
             if not args.run:
                 print(f"[dry] {d['skill']}: {case['expect']}: {case['prompt']}")
                 continue
