@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """Read-only scan for hard-coded credentials. Reports `path:line: rule` and NEVER prints a matched value.
 

@@ -1,4 +1,4 @@
-claude-gh-skills Source-Available License, version 1.0
+claude-gh-skills Source-Available License, version 1.1
 
 Copyright 2026 Aymard Kouakou (https://github.com/aymardkouakou)
 Official repository: https://github.com/aymardkouakou/claude-gh-skills
@@ -6,12 +6,18 @@ Official repository: https://github.com/aymardkouakou/claude-gh-skills
 This is NOT an open-source license. The work is published so that anyone can read,
 use and improve it, but it evolves in one place only: the official repository.
 
+Version history: version 1.0 applied to releases v0.9.0 to v0.11.0 and stays in force
+for those releases as received. Version 1.1 applies from release v0.12.0. Releases up
+to and including v0.8.0 were published under the Apache License 2.0 (section 6).
+
 1. Definitions
    "Work": the skills, scripts, hooks, plugin manifests, tests and documentation in
-   the official repository, in any version released from v0.9.0 onwards.
+   the official repository, in any release covered by this version.
    "Official Repository": https://github.com/aymardkouakou/claude-gh-skills.
    "Licensor": Aymard Kouakou.
-   "You": any person or entity using the Work.
+   "You": any person or entity using the Work or making a Contribution.
+   "Contribution": any code, text or other material You submit to the Official
+   Repository (in an issue, a pull request or a comment) for inclusion in the Work.
 
 2. Permitted use
    Subject to this license, You may, free of charge:
@@ -19,36 +25,58 @@ use and improve it, but it evolves in one place only: the official repository.
    b. read and study the Work;
    c. keep private copies and make private modifications for Your own use, without
       sharing them with anyone outside Your own organization;
-   d. fork the Official Repository on GitHub solely to prepare a pull request to it.
+   d. fork the Official Repository on GitHub solely to prepare a pull request to it,
+      and keep the fork for up to 30 days after that pull request is merged or closed;
+   e. rely on the Licensor's patent license: to the extent the Licensor holds patents
+      that the Work necessarily infringes, the Licensor licenses You to use the Work
+      as permitted here. This patent license ends for You if You bring a claim that
+      the Work infringes a patent.
+   Nothing in this license limits the rights that GitHub's Terms of Service give users
+   of GitHub to view and fork a public repository on GitHub itself; what a fork
+   contains remains governed by this license.
 
 3. Restrictions
    You may NOT, without the Licensor's prior written permission:
    a. publish, distribute, sublicense, sell or host the Work, or any modified or
       derivative version of it, on any channel other than the Official Repository
-      and the plugin marketplace entry it publishes (this includes public forks kept
-      beyond what is needed for a pending pull request, republished plugins,
-      mirrors and packages);
-   b. present a modified version as the Work, or use the Work's name to suggest
-      endorsement by the Licensor;
-   c. remove or alter the copyright notice, this license or the NOTICE file.
+      (which includes the plugin marketplace manifest it publishes); this includes
+      forks kept public more than 30 days after the pull request they served is
+      merged or closed, republished plugins, mirrors and packages;
+   b. present a modified version as the Work, or suggest endorsement by the Licensor;
+   c. remove or alter the copyright notice, this license or the NOTICE file;
+   d. use the names "claude-gh-skills" or "traceable-dev", or the Licensor's name,
+      except to state accurately where the Work comes from.
 
 4. Contributions
-   The Work evolves only through contributions made to the Official Repository
-   (issues and pull requests). By submitting a contribution, You certify that You
-   have the right to do so and You grant the Licensor a perpetual, worldwide,
-   non-exclusive, irrevocable, royalty-free license to use, modify, distribute and
-   sublicense the contribution as part of the Work, including under different terms.
-   You keep the copyright in Your contribution. The Licensor may accept, modify or
-   reject any contribution.
+   The Work evolves only through Contributions made to the Official Repository.
+   By submitting a Contribution, You:
+   a. certify that it is Your original work or that You have the right to submit it,
+      and that no employer or other third party has a claim on it that You have not
+      disclosed in the pull request;
+   b. keep the copyright in it, and grant the Licensor and every recipient of the Work
+      a perpetual, worldwide, non-exclusive, irrevocable, royalty-free license to use,
+      reproduce, modify and distribute it as part of the Work under this license, and
+      grant the Licensor the further right to sublicense it and to distribute it
+      under different terms, including a later version of this license;
+   c. to the extent the law allows, waive, or agree not to assert against the Licensor
+      and recipients of the Work, any moral rights in it;
+   d. understand that a `Signed-off-by:` line in a commit certifies the Developer
+      Certificate of Origin, version 1.1 (https://developercertificate.org), in
+      addition to the above.
+   The Licensor may accept, modify or reject any Contribution and has no obligation
+   to use it. Contributions submitted anywhere other than the Official Repository are
+   not Contributions and are not accepted.
 
 5. Attribution
    Any permitted copy of the Work must keep the copyright notice, this license and
    the NOTICE file. The Licensor must be credited as the original author.
 
 6. Earlier versions
-   Versions released up to and including v0.8.0 were published under the Apache
-   License 2.0. That grant stays valid for those versions, as received, and is not
-   withdrawn. This license applies to every version from v0.9.0 onwards.
+   Releases up to and including v0.8.0 were published under the Apache License 2.0.
+   That grant stays valid for those releases, as received, and is not withdrawn.
+   Releases v0.9.0 to v0.11.0 stay under version 1.0 of this license as received.
+   Version 1.1 applies to every release from v0.12.0 onwards. Contributions accepted
+   after v0.11.0 are licensed under version 1.1.
 
 7. Termination
    Any breach of this license ends Your rights under it. They are reinstated if You

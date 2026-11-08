@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """repo-context: resolve and remember the active GitHub repository (fully gh-compatible).
 

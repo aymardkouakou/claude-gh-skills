@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """Requirements traceability matrix from GitHub and git history. Read-only.
 

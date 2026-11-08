@@ -14,4 +14,4 @@ Issues and pull requests on this repository are the only way the skills evolve: 
 
 Releases follow SemVer and keep `.claude-plugin/*.json` in step with the changelog (a test checks it). The maintainer cuts them with `python3 scripts/release.py X.Y.Z --refs N --apply [--push]`; without `--apply` it is a dry run.
 
-By contributing you agree to section 4 of the [`LICENSE`](LICENSE): you keep your copyright and grant the author a perpetual, irrevocable licence to use and distribute your contribution as part of the work.
+By contributing you agree to section 4 of the [`LICENSE`](LICENSE): you keep your copyright, certify that the work is yours to submit, and grant the author and every recipient of the work a perpetual, irrevocable licence to use and distribute it as part of the work (the author may also relicense it). Contributions only count when made on this repository. A `Signed-off-by:` line (`git commit -s`) additionally certifies the [Developer Certificate of Origin](https://developercertificate.org).

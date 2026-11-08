@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """Replay the trigger evaluations against Claude Code and grade them.
 

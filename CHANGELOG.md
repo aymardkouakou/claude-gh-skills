@@ -4,6 +4,9 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+### Changed
+- **Licence 1.1** (legal review, #26; not legal advice, a lawyer's review is still advisable): adds a defined `Contribution`, a fuller contributor grant (originality and employer warranty, recipients covered, relicensing, moral rights, optional DCO `Signed-off-by`), a patent licence, a trademark clause, a 30-day limit on forks kept after a pull request, an acknowledgement of GitHub's own fork rights, and a version history; releases v0.9.0 to v0.11.0 stay under 1.0. SPDX headers become `LicenseRef-claude-gh-skills-1.1`.
+
 ## [0.11.0] - 2026-11-08
 
 ### Changed
@@ -28,7 +31,7 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 ## [0.9.0] - 2026-11-08
 
 ### Changed
-- **Licence**: Apache-2.0 replaced by the claude-gh-skills Source-Available License 1.0 for versions from v0.9.0: free use, no redistribution of the work or of modified versions, changes only through contributions to this repository, attribution kept. Versions up to v0.8.0 remain under Apache-2.0. SPDX headers now `LicenseRef-claude-gh-skills-1.0`, manifests `SEE LICENSE IN LICENSE`.
+- **Licence**: Apache-2.0 replaced by the claude-gh-skills Source-Available License 1.0 for versions from v0.9.0: free use, no redistribution of the work or of modified versions, changes only through contributions to this repository, attribution kept. Versions up to v0.8.0 remain under Apache-2.0. SPDX headers now `LicenseRef-claude-gh-skills-1.1`, manifests `SEE LICENSE IN LICENSE`.
 - `security-audit`, `repo-hardening`, `secrets-hygiene`, `change-management`, `incident-response` and `skill-learning` gain a `Tracking` section: findings, records and approved proposals become issues attached to the Project and an epic (every gap, not only critical ones; never a secret value in issue text). Rule added to `CONVENTIONS.md`, enforced by a conventions test (196 tests).
 
 ## [0.8.0] - 2026-11-08

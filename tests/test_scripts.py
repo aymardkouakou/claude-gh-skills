@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """Shell helpers, run for real with a stubbed gh on PATH and an isolated state directory."""
 import os

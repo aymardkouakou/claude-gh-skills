@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 import contextlib
 import importlib.util
@@ -33,7 +33,7 @@ class Rules(unittest.TestCase):
         self.assertEqual(rules("xoxb-" + "1" * 12), ["slack-token"])
         self.assertEqual(rules("sk_live_" + "a" * 20), ["stripe-live-key"])
         self.assertEqual(rules("-----BEGIN RSA PRIVATE KEY-----"), ["private-key-block"])
-        self.assertEqual(rules("postgres://app:Zq8wxyz1@db/x"), ["credential-in-url"])
+        self.assertEqual(rules("postgres://app:Zq8wxyz1@db/x"), ["credential-in-url"])  # secret-scan: ignore
         self.assertEqual(rules(CRED), ["hard-coded-credential"])
 
     def test_ignores_placeholders_and_marked_lines(self):

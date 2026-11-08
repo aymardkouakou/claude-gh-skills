@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 """portfolio.py (multi-repository report) and audit_org.py (multi-repository protections)."""
 import contextlib

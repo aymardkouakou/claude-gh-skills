@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.0
+# SPDX-License-Identifier: LicenseRef-claude-gh-skills-1.1
 # Copyright 2026 Aymard Kouakou - see NOTICE
 # List commits in a range that carry no issue reference (Refs #n, owner/repo#n, or a documented `No-Issue: <reason>` line): check-refs.sh <base>..<head>
 # Exit code 1 if a reference is missing (usable in CI). Read-only.

@@ -158,7 +158,7 @@ Conventions (structure, frontmatter, English-only rule, safety rules): [`CONVENT
 
 ## License
 
-[claude-gh-skills Source-Available License 1.0](LICENSE) © 2026 [Aymard Kouakou](https://github.com/aymardkouakou). Free to install and use (personal or commercial); the skills evolve **only through contributions to this repository** (issues and pull requests). Redistribution of the work or of modified versions elsewhere is not allowed, and the [`NOTICE`](NOTICE) and copyright notice must be kept. Versions up to v0.8.0 remain under Apache-2.0.
+[claude-gh-skills Source-Available License 1.1](LICENSE) © 2026 [Aymard Kouakou](https://github.com/aymardkouakou). Free to install and use (personal or commercial); the skills evolve **only through contributions to this repository** (issues and pull requests). Redistribution of the work or of modified versions elsewhere is not allowed, and the [`NOTICE`](NOTICE) and copyright notice must be kept. Versions up to v0.8.0 remain under Apache-2.0 and v0.9.0 to v0.11.0 under license 1.0.
 
 ## Scope and limits
 
