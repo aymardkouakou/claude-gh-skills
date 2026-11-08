@@ -4,6 +4,8 @@ All notable changes to this repository. Format: [Keep a Changelog](https://keepa
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-08
+
 ### Changed
 - Skill descriptions tuned from the first live evaluation run (#27): task lists converted into sub-issues belong to `project-board` only (removed from `project-tracking`, which overlapped), `project-board` and `issue-lifecycle` gain the English and French phrases that were missed; two evaluation prompts made concrete. After isolating the runs, 28 re-run cases of the five failing skills pass; results vary between runs, so a single failure means re-run.
 

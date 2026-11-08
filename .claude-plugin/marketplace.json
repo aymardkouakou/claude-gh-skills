@@ -10,7 +10,7 @@
       "name": "traceable-dev",
       "source": "./",
       "description": "Eleven focused skills for GitHub-driven development: Project and epic tracking, Project views and reports, change traceability and management, repository hardening, security audit, secrets, incidents.",
-      "version": "0.10.0",
+      "version": "0.11.0",
       "license": "SEE LICENSE IN LICENSE"
     }
   ]
