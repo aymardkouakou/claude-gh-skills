@@ -2,14 +2,14 @@
 
 All notable changes to this repository. Format: [Keep a Changelog](https://keepachangelog.com/), versions follow SemVer.
 
-## [Unreleased]
+## [0.8.0] - 2026-11-08
 
 ### Fixed
 - `journal.sh`, `check-refs.sh` and `text_guard.py` print a clear `Usage:` line (exit 2) on missing arguments, and accept `--help`; an unreadable file no longer produces a traceback.
 - `install.sh doctor` no longer reports missing symlinks when the `traceable-dev` plugin is installed (the two modes are exclusive).
 
 ### Added
-- 4 usage tests.
+- 11 tests (usage messages, hook, `No-Issue` exception): 195 in total.
 - `hooks/` (plugin `PreToolUse` hook): `git commit -m …` is denied without `Refs|Fixes|Closes|Resolves #n` in repositories that adopted tracking (a Project is remembered by `repo-context`). A `No-Issue: <reason>` line documents an exception; `check-refs.sh` accepts it too. Fail-open when the commit cannot be inspected. Plugin install only (symlink installs have no hooks).
 
 ## [0.7.2] - 2026-11-05
